@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景円 -->
+  <circle cx="30" cy="30" r="28" fill="#4C97FF"/>
+
+  <!-- ロボットの頭部（横長の長方形） -->
+  <rect x="16" y="26" width="28" height="18" rx="4" fill="white"/>
+
+  <!-- 左目 -->
+  <ellipse cx="24" cy="35" rx="3.5" ry="4.5" fill="#4C97FF"/>
+  <ellipse cx="24" cy="34" rx="1.8" ry="2.2" fill="white" opacity="0.6"/>
+
+  <!-- 右目 -->
+  <ellipse cx="36" cy="35" rx="3.5" ry="4.5" fill="#4C97FF"/>
+  <ellipse cx="36" cy="34" rx="1.8" ry="2.2" fill="white" opacity="0.6"/>
+
+  <!-- 目をつなぐ横のライン -->
+  <line x1="27.5" y1="35" x2="32.5" y2="35" stroke="#4C97FF" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- 左アンテナ（ラインのみ、球体なし） -->
+  <line x1="22" y1="26" x2="16" y2="12"
+        stroke="white"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <!-- 右アンテナ（ラインのみ、球体なし） -->
+  <line x1="38" y1="26" x2="44" y2="12"
+        stroke="white"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <!-- ボディの示唆（下部） -->
+  <rect x="20" y="44" width="20" height="4" rx="2" fill="white" opacity="0.7"/>
+</svg>

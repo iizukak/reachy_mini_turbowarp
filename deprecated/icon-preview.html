@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reachy Mini Icon Preview</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+        }
+        h1 {
+            color: #4C97FF;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .preview-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+        .preview-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(76, 151, 255, 0.3);
+        }
+        .preview-item h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .icon-wrapper {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .bg-white { background: white; padding: 10px; border-radius: 10px; }
+        .bg-gray { background: #e9ecef; padding: 10px; border-radius: 10px; }
+        .bg-scratch { background: #4C97FF; padding: 10px; border-radius: 10px; }
+        .bg-dark { background: #212529; padding: 10px; border-radius: 10px; }
+        .size-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .features {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .features h3 {
+            color: #4C97FF;
+            margin-bottom: 15px;
+        }
+        .features ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .features li {
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .code-section {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .code-section code {
+            color: #98c379;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Reachy Mini アイコン</h1>
+        <p class="subtitle">TurboWarp拡張機能用カスタムアイコン</p>
+
+        <div class="features">
+            <h3>✨ デザインの特徴</h3>
+            <ul>
+                <li>📡 2本の特徴的なアンテナ（赤い先端）</li>
+                <li>👀 大きな表情豊かな目</li>
+                <li>😊 可愛らしい笑顔</li>
+                <li>🎨 Scratchブルー（#4C97FF）をベースカラーに</li>
+                <li>⚡ SVG形式で拡大縮小に対応</li>
+            </ul>
+        </div>
+
+        <div class="preview-grid">
+            <div class="preview-item">
+                <h3>小サイズ（ブロック用）</h3>
+                <div class="icon-wrapper bg-white">
+                    <img src="reachy-mini-icon.svg" width="20" height="20" alt="Reachy Mini Icon 20px">
+                </div>
+                <div class="size-note">20×20 px</div>
+            </div>
+
+            <div class="preview-item">
+                <h3>中サイズ</h3>
+                <div class="icon-wrapper bg-white">
+                    <img src="reachy-mini-icon.svg" width="40" height="40" alt="Reachy Mini Icon 40px">
+                </div>
+                <div class="size-note">40×40 px</div>
+            </div>
+
+            <div class="preview-item">
+                <h3>大サイズ（メニュー用）</h3>
+                <div class="icon-wrapper bg-white">
+                    <img src="reachy-mini-icon.svg" width="60" height="60" alt="Reachy Mini Icon 60px">
+                </div>
+                <div class="size-note">60×60 px</div>
+            </div>
+
+            <div class="preview-item">
+                <h3>特大サイズ</h3>
+                <div class="icon-wrapper bg-white">
+                    <img src="reachy-mini-icon.svg" width="100" height="100" alt="Reachy Mini Icon 100px">
+                </div>
+                <div class="size-note">100×100 px</div>
+            </div>
+        </div>
+
+        <h3 style="color: #333; margin-bottom: 20px;">各背景での表示</h3>
+        <div class="preview-grid">
+            <div class="preview-item">
+                <h3>白背景</h3>
+                <div class="icon-wrapper bg-white">
+                    <img src="reachy-mini-icon.svg" width="60" height="60" alt="White background">
+                </div>
+            </div>
+
+            <div class="preview-item">
+                <h3>グレー背景</h3>
+                <div class="icon-wrapper bg-gray">
+                    <img src="reachy-mini-icon.svg" width="60" height="60" alt="Gray background">
+                </div>
+            </div>
+
+            <div class="preview-item">
+                <h3>Scratchブルー背景</h3>
+                <div class="icon-wrapper bg-scratch">
+                    <img src="reachy-mini-icon.svg" width="60" height="60" alt="Scratch background">
+                </div>
+            </div>
+
+            <div class="preview-item">
+                <h3>ダーク背景</h3>
+                <div class="icon-wrapper bg-dark">
+                    <img src="reachy-mini-icon.svg" width="60" height="60" alt="Dark background">
+                </div>
+            </div>
+        </div>
+
+        <h3 style="color: #333; margin-bottom: 15px;">実装コード</h3>
+        <div class="code-section">
+<code>// JavaScript拡張機能での使用例
+const iconURI = 'data:image/svg+xml;base64,PD94bWwgd...';
+
+getInfo() {
+    return {
+        id: 'reachymini',
+        name: 'Reachy Mini',
+        blockIconURI: iconURI,  // ブロックアイコン
+        menuIconURI: iconURI,   // メニューアイコン
+        // ...
+    };
+}</code>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
+            📝 詳細は <a href="ICON_DESIGN.md" style="color: #4C97FF;">ICON_DESIGN.md</a> を参照
+        </p>
+    </div>
+</body>
+</html>
