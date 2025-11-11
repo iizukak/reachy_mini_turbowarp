@@ -39,7 +39,7 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
 
       // General rules
-      'no-console': 'warn',
+      'no-console': ['warn', { allow: ['error', 'warn'] }],
       'prefer-const': 'error',
     },
   },
