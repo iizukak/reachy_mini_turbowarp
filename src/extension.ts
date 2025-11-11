@@ -14,16 +14,19 @@ import type { MotorControlMode } from './types/api.js';
 
 /**
  * Head direction presets (in radians)
+ * NOTE: Actual robot coordinate system is inverted from documentation
+ * - Negative pitch: look up
+ * - Positive pitch: look down
  */
 const HEAD_DIRECTION_PRESETS: HeadDirectionPresets = {
-  UP: { pitch: 0.3, yaw: 0, roll: 0 },
-  DOWN: { pitch: -0.3, yaw: 0, roll: 0 },
+  UP: { pitch: -0.3, yaw: 0, roll: 0 },
+  DOWN: { pitch: 0.3, yaw: 0, roll: 0 },
   LEFT: { pitch: 0, yaw: 0.5, roll: 0 },
   RIGHT: { pitch: 0, yaw: -0.5, roll: 0 },
-  UP_LEFT: { pitch: 0.3, yaw: 0.5, roll: 0 },
-  UP_RIGHT: { pitch: 0.3, yaw: -0.5, roll: 0 },
-  DOWN_LEFT: { pitch: -0.3, yaw: 0.5, roll: 0 },
-  DOWN_RIGHT: { pitch: -0.3, yaw: -0.5, roll: 0 },
+  UP_LEFT: { pitch: -0.3, yaw: 0.5, roll: 0 },
+  UP_RIGHT: { pitch: -0.3, yaw: -0.5, roll: 0 },
+  DOWN_LEFT: { pitch: 0.3, yaw: 0.5, roll: 0 },
+  DOWN_RIGHT: { pitch: 0.3, yaw: -0.5, roll: 0 },
   CENTER: { pitch: 0, yaw: 0, roll: 0 },
 };
 
@@ -61,12 +64,12 @@ export class ReachyMiniExtension {
         // Basic movements
         {
           opcode: 'wakeUp',
-          blockType: BlockType.COMMAND,
+          blockType: 'command',
           text: 'wake up robot',
         },
         {
           opcode: 'gotoSleep',
-          blockType: BlockType.COMMAND,
+          blockType: 'command',
           text: 'put robot to sleep',
         },
         '---',
@@ -74,16 +77,16 @@ export class ReachyMiniExtension {
         // Head control - simple
         {
           opcode: 'moveHeadDirection',
-          blockType: BlockType.COMMAND,
+          blockType: 'command',
           text: 'move head [DIRECTION] for [DURATION] seconds',
           arguments: {
             DIRECTION: {
-              type: ArgumentType.STRING,
+              type: 'string',
               menu: 'headDirection',
               defaultValue: 'CENTER',
             },
             DURATION: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 2,
             },
           },
@@ -92,23 +95,23 @@ export class ReachyMiniExtension {
         // Head control - custom
         {
           opcode: 'moveHeadCustom',
-          blockType: BlockType.COMMAND,
+          blockType: 'command',
           text: 'move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s',
           arguments: {
             PITCH: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 0,
             },
             YAW: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 0,
             },
             ROLL: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 0,
             },
             DURATION: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 2,
             },
           },
@@ -118,34 +121,34 @@ export class ReachyMiniExtension {
         // Antenna control
         {
           opcode: 'moveAntennas',
-          blockType: BlockType.COMMAND,
+          blockType: 'command',
           text: 'move antennas left [LEFT]° right [RIGHT]° for [DURATION]s',
           arguments: {
             LEFT: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 0,
             },
             RIGHT: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 0,
             },
             DURATION: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 2,
             },
           },
         },
         {
           opcode: 'moveAntennasBoth',
-          blockType: BlockType.COMMAND,
+          blockType: 'command',
           text: 'move both antennas [ANGLE]° for [DURATION]s',
           arguments: {
             ANGLE: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 0,
             },
             DURATION: {
-              type: ArgumentType.NUMBER,
+              type: 'number',
               defaultValue: 2,
             },
           },
@@ -155,11 +158,11 @@ export class ReachyMiniExtension {
         // Motor control
         {
           opcode: 'setMotorMode',
-          blockType: BlockType.COMMAND,
+          blockType: 'command',
           text: 'set motor mode [MODE]',
           arguments: {
             MODE: {
-              type: ArgumentType.STRING,
+              type: 'string',
               menu: 'motorMode',
               defaultValue: 'enabled',
             },
@@ -170,37 +173,37 @@ export class ReachyMiniExtension {
         // Reporter blocks (getters)
         {
           opcode: 'getHeadPitch',
-          blockType: BlockType.REPORTER,
+          blockType: 'reporter',
           text: 'head pitch (degrees)',
         },
         {
           opcode: 'getHeadYaw',
-          blockType: BlockType.REPORTER,
+          blockType: 'reporter',
           text: 'head yaw (degrees)',
         },
         {
           opcode: 'getHeadRoll',
-          blockType: BlockType.REPORTER,
+          blockType: 'reporter',
           text: 'head roll (degrees)',
         },
         {
           opcode: 'getLeftAntenna',
-          blockType: BlockType.REPORTER,
+          blockType: 'reporter',
           text: 'left antenna angle (degrees)',
         },
         {
           opcode: 'getRightAntenna',
-          blockType: BlockType.REPORTER,
+          blockType: 'reporter',
           text: 'right antenna angle (degrees)',
         },
         {
           opcode: 'getBodyYaw',
-          blockType: BlockType.REPORTER,
+          blockType: 'reporter',
           text: 'body yaw (degrees)',
         },
         {
           opcode: 'getMotorMode',
-          blockType: BlockType.REPORTER,
+          blockType: 'reporter',
           text: 'motor mode',
         },
         '---',
@@ -208,7 +211,7 @@ export class ReachyMiniExtension {
         // System
         {
           opcode: 'isDaemonConnected',
-          blockType: BlockType.BOOLEAN,
+          blockType: 'Boolean',
           text: 'daemon connected?',
         },
       ],
@@ -578,26 +581,18 @@ export class ReachyMiniExtension {
 }
 
 // ============================================================================
-// Scratch Extension API Types (from @turbowarp/types)
+// Scratch Extension API Types
 // ============================================================================
 
 /**
- * Block type enum
+ * Block type literal
  */
-enum BlockType {
-  COMMAND = 'command',
-  REPORTER = 'reporter',
-  BOOLEAN = 'Boolean',
-}
+type BlockType = 'command' | 'reporter' | 'Boolean';
 
 /**
- * Argument type enum
+ * Argument type literal
  */
-enum ArgumentType {
-  NUMBER = 'number',
-  STRING = 'string',
-  BOOLEAN = 'Boolean',
-}
+type ArgumentType = 'number' | 'string' | 'Boolean';
 
 /**
  * Extension info interface

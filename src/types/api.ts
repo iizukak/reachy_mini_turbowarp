@@ -139,6 +139,21 @@ export interface MessageResponse {
   message: string;
 }
 
+/**
+ * Daemon status response
+ */
+export interface DaemonStatus {
+  state: string;
+  wireless_version: boolean;
+  simulation_enabled: boolean;
+  backend_status: {
+    motor_control_mode: MotorControlMode;
+    error: string | null;
+  };
+  error: string | null;
+  wlan_ip: string | null;
+}
+
 // ============================================================================
 // API Client Type Helpers
 // ============================================================================

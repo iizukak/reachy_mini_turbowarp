@@ -4,6 +4,7 @@
  */
 
 import type {
+  DaemonStatus,
   FullState,
   GotoRequest,
   MotorControlMode,
@@ -21,7 +22,7 @@ import type {
  */
 export const DEFAULT_API_CONFIG = {
   baseUrl: 'http://localhost:8000/api',
-  timeout: 10000, // 10 seconds
+  timeout: 30000, // 30 seconds (needed for simulator movements)
 } as const;
 
 /**
@@ -182,7 +183,7 @@ export class ReachyMiniApiClient {
    */
   async isMovementRunning(): Promise<boolean> {
     const url = `${this.config.baseUrl}/move/running`;
-    const response = await makeRequest<{ running: boolean }>(
+    const response = await makeRequest<string[]>(
       url,
       {
         method: 'GET',
@@ -190,7 +191,8 @@ export class ReachyMiniApiClient {
       },
       this.config.timeout
     );
-    return response.running;
+    // Returns array of running movement UUIDs, empty if none
+    return response.length > 0;
   }
 
   /**
@@ -261,7 +263,7 @@ export class ReachyMiniApiClient {
    */
   async getBodyYaw(): Promise<number> {
     const url = `${this.config.baseUrl}/state/present_body_yaw`;
-    const response = await makeRequest<{ body_yaw: number }>(
+    return makeRequest<number>(
       url,
       {
         method: 'GET',
@@ -269,7 +271,6 @@ export class ReachyMiniApiClient {
       },
       this.config.timeout
     );
-    return response.body_yaw;
   }
 
   /**
@@ -277,7 +278,7 @@ export class ReachyMiniApiClient {
    */
   async getAntennaPositions(): Promise<[number, number]> {
     const url = `${this.config.baseUrl}/state/present_antenna_joint_positions`;
-    const response = await makeRequest<{ positions: [number, number] }>(
+    return makeRequest<[number, number]>(
       url,
       {
         method: 'GET',
@@ -285,7 +286,6 @@ export class ReachyMiniApiClient {
       },
       this.config.timeout
     );
-    return response.positions;
   }
 
   // ==========================================================================
@@ -329,9 +329,9 @@ export class ReachyMiniApiClient {
   /**
    * Gets the daemon status
    */
-  async getDaemonStatus(): Promise<StatusResponse> {
+  async getDaemonStatus(): Promise<DaemonStatus> {
     const url = `${this.config.baseUrl}/daemon/status`;
-    return makeRequest<StatusResponse>(
+    return makeRequest<DaemonStatus>(
       url,
       {
         method: 'GET',
