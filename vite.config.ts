@@ -1,0 +1,50 @@
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
+
+export default defineConfig({
+  // Build configuration for TurboWarp extension
+  build: {
+    // Library mode - generates a single JS file
+    lib: {
+      entry: resolve(__dirname, 'src/index.ts'),
+      name: 'ReachyMiniExtension',
+      formats: ['iife'], // Immediately Invoked Function Expression
+      fileName: () => 'extension.js',
+    },
+    // Output directory
+    outDir: 'dist',
+    // Generate source maps for debugging
+    sourcemap: true,
+    // Minify for production
+    minify: 'esbuild',
+    // Target modern browsers
+    target: 'es2020',
+    // Don't clear the output directory automatically (useful for debugging)
+    emptyOutDir: true,
+  },
+
+  // Development server configuration
+  server: {
+    port: 3000,
+    // Enable CORS for TurboWarp to load the extension
+    cors: true,
+    // Open browser automatically
+    open: false,
+    // Strict port (fail if port is already in use)
+    strictPort: true,
+  },
+
+  // Preview server configuration (for testing built extension)
+  preview: {
+    port: 3000,
+    cors: true,
+    strictPort: true,
+  },
+
+  // Resolve configuration
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+});
