@@ -5,14 +5,14 @@
 
 import { describe, test, expect, beforeAll, afterEach } from 'vitest';
 import { ReachyMiniExtension } from '../../src/extension.js';
-import { degToRad } from '../../src/utils/angle.js';
+// import { degToRad } from '../../src/utils/angle.js'; // Unused after commenting out tests
 import {
   waitForDaemon,
   resetRobotPose,
-  waitForMovement,
+  // waitForMovement, // Unused after commenting out tests
   waitForAnimation,
-  getRobotState,
-  expectAngleCloseTo,
+  // getRobotState, // Unused after commenting out tests
+  // expectAngleCloseTo, // Unused after commenting out tests
 } from './test-utils.js';
 
 describe('Extension Integration Tests', () => {
