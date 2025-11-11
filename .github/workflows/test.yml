@@ -64,7 +64,7 @@ jobs:
           echo $! > daemon.pid
           echo "Daemon PID: $(cat daemon.pid)"
           echo "Waiting for daemon to start..."
-          sleep 15
+          sleep 20
 
       - name: Check daemon status
         run: |
@@ -96,22 +96,18 @@ jobs:
         run: npm ci
 
       - name: Build extension
-        run: |
-          if [ -f "src/index.ts" ]; then
-            npm run build
-          else
-            echo "src/index.ts not found. Skipping build..."
-            echo "This is expected as the main entry point will be added later."
-          fi
+        run: npm run build
 
       - name: Run integration tests
-        run: |
-          if [ -d "tests/integration" ] && [ "$(ls -A tests/integration/*.test.ts 2>/dev/null)" ]; then
-            npm run test:integration
-          else
-            echo "No integration tests found. Skipping..."
-            echo "This is expected as integration tests will be added later."
-          fi
+        run: npm run test:integration
+
+      - name: Upload daemon logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daemon-logs
+          path: daemon.log
+          retention-days: 7
 
   lint:
     name: Lint
