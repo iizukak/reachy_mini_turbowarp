@@ -305,11 +305,18 @@ reachy_mini_turbowarp/
 ├── .github/workflows/
 │   └── test.yml              # CI/CD設定（後述）
 ├── src/
+│   ├── api/
+│   │   └── client.ts        # REST APIクライアント
 │   ├── types/
 │   │   ├── api.ts           # REST API型定義
 │   │   └── extension.ts     # 拡張機能内部型定義
-│   └── utils/
-│       └── angle.ts         # 角度変換ユーティリティ
+│   ├── utils/
+│   │   └── angle.ts         # 角度変換ユーティリティ
+│   ├── extension.ts         # Scratch拡張機能クラス
+│   └── index.ts             # エントリーポイント
+├── dist/
+│   ├── extension.js         # ビルド成果物（9.82 kB）
+│   └── extension.js.map     # ソースマップ
 ├── tests/
 │   └── unit/
 │       └── utils/
@@ -354,25 +361,64 @@ TurboWarp拡張機能の内部型定義：
 - エッジケースのテスト
 - **合計19テスト、全てパス ✓**
 
-### 🚧 Phase 3: コア実装（未着手）
+### ✅ Phase 3: コア実装（完了）
 
-次のステップ：
-1. Extension クラスの骨組み (`src/extension.ts`)
-2. API通信層の実装 (`src/api/client.ts`)
-3. ブロック定義（英語版のみ）
-4. 基本機能の実装（wake_up, goto_sleep, 頭制御、アンテナ制御）
+#### src/api/client.ts
+REST API通信層の実装：
+- **ReachyMiniApiClient クラス**: 型安全なAPIクライアント
+- **エラーハンドリング**: `ApiError` クラスでステータスコードと元エラーを保持
+- **タイムアウトサポート**: デフォルト10秒、`AbortController` 使用
+- **実装済みメソッド**:
+  - 動作制御: `wakeUp()`, `gotoSleep()`, `goto()`, `stopMovement()`, `isMovementRunning()`
+  - 状態取得: `getFullState()`, `getHeadPose()`, `getBodyYaw()`, `getAntennaPositions()`
+  - モーター制御: `getMotorStatus()`, `setMotorMode()`
+  - システム: `getDaemonStatus()`, `ping()`
+- **シングルトンインスタンス**: `apiClient` をエクスポート
+
+#### src/extension.ts
+Scratch拡張機能の実装（英語版のみ）：
+- **ReachyMiniExtension クラス**: Scratch拡張機能インターフェース実装
+- **拡張機能メタデータ**:
+  - ID: `reachymini`
+  - 名前: `Reachy Mini`
+  - カラーテーマ: 青系（`#4C97FF`, `#3373CC`, `#2E5BA6`）
+- **ブロック定義** (全て英語):
+  - 基本動作: `wake up robot`, `put robot to sleep`
+  - 頭制御: 方向プリセット（center/up/down/left/right等）、カスタム角度指定
+  - アンテナ制御: 個別制御、対称制御
+  - モーター制御: モード設定（enabled/disabled/gravity_compensation）
+  - レポーター: pitch/yaw/roll、アンテナ角度、body yaw、モーターモード
+  - システム: daemon接続確認
+- **HEAD_DIRECTION_PRESETS**: 9方向のプリセット（ラジアン値）
+- **状態キャッシュ**: `updateStateCache()` でロボット状態を保持
+- **度数法 ↔ ラジアン変換**: ユーザー入力は度数法、API通信はラジアン
+
+#### src/index.ts
+拡張機能エントリーポイント：
+- **グローバル `Scratch` オブジェクト宣言**: TypeScript型定義
+- **拡張機能登録**: `Scratch.extensions.register(new ReachyMiniExtension())`
+- **IIFE パターン**: 即時実行関数で安全にラップ
+
+#### ビルド成果物
+- **dist/extension.js**: 9.82 kB (gzip: 2.55 kB)
+- **フォーマット**: IIFE（Immediately Invoked Function Expression）
+- **ソースマップ**: 有効（37.98 kB）
 
 ### ⏸️ Phase 4: 多言語対応（未着手）
 
-後のステップで実装予定。
+次のステップ：
+1. メッセージカタログの作成（`src/i18n/en.json`, `src/i18n/ja.json`）
+2. `formatMessage` 関数の実装
+3. 全ブロックテキストの多言語化
+4. メニューアイテムの多言語化
 
 ### ⏸️ Phase 5: テスト・ドキュメント（一部完了）
 
-- ✅ 角度変換のユニットテスト
+- ✅ 角度変換のユニットテスト（19テスト）
 - ⏸️ API通信のユニットテスト（モック使用）
 - ⏸️ 統合テスト（daemon連携）
 - ⏸️ TurboWarpでの動作確認
-- ⏸️ README、使い方ガイド
+- ⏸️ README、使い方ガイドの作成
 
 ## GitHub Actions CI/CD
 
@@ -833,4 +879,4 @@ Apache 2.0 License
 ---
 
 **Last Updated**: 2025-11-11
-**Project Status**: Phase 1-2 完了、Phase 3（コア実装）開始
+**Project Status**: Phase 1-3 完了、Phase 4（多言語対応）準備中
