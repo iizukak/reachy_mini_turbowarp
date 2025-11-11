@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { degToRad, radToDeg } from '@/utils/angle';
+import { degToRad, radToDeg } from '../../../src/utils/angle.js';
 
 describe('Angle Conversion Utilities', () => {
   describe('degToRad', () => {
