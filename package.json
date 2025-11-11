@@ -27,6 +27,7 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@turbowarp/types": "git+https://github.com/TurboWarp/types-tw.git#tw",
     "@types/node": "^22.10.2",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
