@@ -22,6 +22,7 @@ const EN_MESSAGES = {
     'move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s',
   'reachymini.blocks.moveAntennas': 'move antennas left [LEFT]° right [RIGHT]° for [DURATION]s',
   'reachymini.blocks.moveAntennasBoth': 'move both antennas [ANGLE]° for [DURATION]s',
+  'reachymini.blocks.moveBodyYaw': 'move body yaw [ANGLE]° for [DURATION]s',
   'reachymini.blocks.setMotorMode': 'set motor mode [MODE]',
   'reachymini.blocks.getHeadPitch': 'head pitch (degrees)',
   'reachymini.blocks.getHeadYaw': 'head yaw (degrees)',
@@ -56,6 +57,7 @@ const JA_MESSAGES: Record<MessageId, string> = {
     '頭を pitch [PITCH]° yaw [YAW]° roll [ROLL]° で [DURATION] 秒動かす',
   'reachymini.blocks.moveAntennas': 'アンテナを 左 [LEFT]° 右 [RIGHT]° で [DURATION] 秒動かす',
   'reachymini.blocks.moveAntennasBoth': '両方のアンテナを [ANGLE]° で [DURATION] 秒動かす',
+  'reachymini.blocks.moveBodyYaw': '胴体を [ANGLE]° で [DURATION] 秒動かす',
   'reachymini.blocks.setMotorMode': 'モーターを [MODE] モードにする',
   'reachymini.blocks.getHeadPitch': '頭のピッチ角 (度)',
   'reachymini.blocks.getHeadYaw': '頭のヨー角 (度)',
@@ -278,6 +280,24 @@ export class ReachyMiniExtension {
           opcode: 'moveAntennasBoth',
           blockType: 'command',
           text: formatMessage('reachymini.blocks.moveAntennasBoth'),
+          arguments: {
+            ANGLE: {
+              type: 'number',
+              defaultValue: 0,
+            },
+            DURATION: {
+              type: 'number',
+              defaultValue: 2,
+            },
+          },
+        },
+        '---',
+
+        // Body control
+        {
+          opcode: 'moveBodyYaw',
+          blockType: 'command',
+          text: formatMessage('reachymini.blocks.moveBodyYaw'),
           arguments: {
             ANGLE: {
               type: 'number',
@@ -583,6 +603,34 @@ export class ReachyMiniExtension {
       await sleep(duration * 1000 + 200);
     } catch (error) {
       console.error('Failed to move both antennas:', error);
+      throw error;
+    }
+  }
+
+  // ==========================================================================
+  // Block Implementations - Body Control
+  // ==========================================================================
+
+  /**
+   * Move body yaw (degrees input)
+   * Waits for movement to complete
+   */
+  async moveBodyYaw(args: { ANGLE: number; DURATION: number }): Promise<void> {
+    try {
+      const bodyYaw = degToRad(Number(args.ANGLE));
+      const duration = Math.max(0.1, Number(args.DURATION));
+
+      const result = await apiClient.goto({
+        body_yaw: bodyYaw,
+        duration,
+        interpolation: 'minjerk',
+      });
+
+      this.state.currentMoveUuid = result.uuid;
+      // Wait for movement to complete (duration + 200ms buffer)
+      await sleep(duration * 1000 + 200);
+    } catch (error) {
+      console.error('Failed to move body yaw:', error);
       throw error;
     }
   }

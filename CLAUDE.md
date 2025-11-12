@@ -115,6 +115,11 @@ reachy_mini_turbowarp/
 - 個別制御（左右別々に指定）
 - 対称制御（両方同じ角度）
 
+#### 胴体制御
+- body yaw（胴体の回転角度）の制御
+  - 範囲: [-180°, 180°]
+  - 注意: head yawとの差は[-65°, 65°]に制限される
+
 #### モーター制御
 - モードの設定（enabled, disabled, gravity_compensation）
 - モーター状態の取得
@@ -387,10 +392,11 @@ Scratch拡張機能の実装（英語版のみ）：
   - ID: `reachymini`
   - 名前: `Reachy Mini`
   - カラーテーマ: 青系（`#4C97FF`, `#3373CC`, `#2E5BA6`）
-- **ブロック定義** (全て英語):
-  - 基本動作: `wake up robot`, `put robot to sleep`
+- **ブロック定義** (英語・日本語対応):
+  - 基本動作: `wake up robot` / `ロボットを起こす`, `put robot to sleep` / `ロボットを寝かせる`
   - 頭制御: 方向プリセット（center/up/down/left/right等）、カスタム角度指定
   - アンテナ制御: 個別制御、対称制御
+  - 胴体制御: body yaw角度制御（度数法、範囲±180°）
   - モーター制御: モード設定（enabled/disabled/gravity_compensation）
   - レポーター: pitch/yaw/roll、アンテナ角度、body yaw、モーターモード
   - システム: daemon接続確認
@@ -405,9 +411,9 @@ Scratch拡張機能の実装（英語版のみ）：
 - **IIFE パターン**: 即時実行関数で安全にラップ
 
 #### ビルド成果物
-- **dist/extension.js**: 14.66 kB (gzip: 3.66 kB)
+- **dist/extension.js**: 15.26 kB (gzip: 3.71 kB)
 - **フォーマット**: IIFE（Immediately Invoked Function Expression）
-- **ソースマップ**: 有効（49.52 kB）
+- **ソースマップ**: 有効（51.54 kB）
 
 #### 動作完了の待機ロジック（重要！）
 
