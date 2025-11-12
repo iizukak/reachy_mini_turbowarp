@@ -31,6 +31,7 @@ Available npm scripts:
 
 | Command | Description |
 | --- | --- |
+| `npm run dev` | Start the Vite dev server with hot reload (`http://localhost:3000`). |
 | `npm run lint` | Run ESLint and formatting checks. |
 | `npm run test:unit` | Execute unit tests (no daemon required). |
 | `npm run test:integration` | Runs against a live/simulated Reachy Mini daemon (ensure `reachy-mini-daemon` is running). |
