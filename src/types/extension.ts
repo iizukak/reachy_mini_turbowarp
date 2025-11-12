@@ -3,7 +3,7 @@
  * Internal types for extension implementation
  */
 
-import type { InterpolationMode, MotorControlMode } from './api.js';
+import type { InterpolationMode, MotorControlMode, XYZRPYPose } from './api.js';
 
 // ============================================================================
 // Block Argument Types
@@ -121,6 +121,33 @@ export type HeadDirectionPresets = {
 };
 
 // ============================================================================
+// Preset Motions
+// ============================================================================
+
+/**
+ * Identifier for predefined motion presets
+ */
+export type PresetMotionId = 'HEAD_NOD' | 'HEAD_SHAKE' | 'ANTENNA_WAVE' | 'BODY_SWAY';
+
+/**
+ * Single step in a preset motion sequence
+ */
+export interface PresetMotionStep {
+  duration: number;
+  head?: Partial<XYZRPYPose>;
+  antennas?: [number, number];
+  bodyYaw?: number;
+}
+
+/**
+ * Preset motion definition
+ */
+export interface PresetMotionDefinition {
+  steps: PresetMotionStep[];
+  interpolation: InterpolationMode;
+}
+
+// ============================================================================
 // Block Arguments
 // ============================================================================
 
@@ -158,6 +185,14 @@ export interface MoveAntennasArgs {
 export interface MoveAntennasBothArgs {
   ANGLE: number; // degrees
   DURATION: number;
+}
+
+/**
+ * Arguments for performPresetMotion block
+ */
+export interface PerformPresetMotionArgs {
+  MOTION: PresetMotionId;
+  CYCLES: number;
 }
 
 /**

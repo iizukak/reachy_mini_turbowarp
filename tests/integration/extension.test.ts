@@ -15,6 +15,28 @@ import {
   expectAngleCloseTo,
 } from './test-utils.js';
 
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function waitForCondition<T>(
+  getter: () => Promise<T>,
+  predicate: (value: T) => boolean,
+  timeoutMs = 2000,
+  intervalMs = 100,
+): Promise<T> {
+  const start = Date.now();
+  let lastValue: T | undefined;
+
+  while (Date.now() - start < timeoutMs) {
+    lastValue = await getter();
+    if (predicate(lastValue)) {
+      return lastValue;
+    }
+    await delay(intervalMs);
+  }
+
+  throw new Error(`Condition not met within ${timeoutMs}ms. Last value: ${lastValue}`);
+}
+
 describe('Extension Integration Tests', () => {
   let extension: ReachyMiniExtension;
 
@@ -246,6 +268,78 @@ describe('Extension Integration Tests', () => {
   //     }
   //   });
   // });
+
+  describe('Preset Motions', () => {
+    test('head nod preset tilts pitch downward before returning', async () => {
+      const motionPromise = extension.performPresetMotion({
+        MOTION: 'HEAD_NOD',
+        CYCLES: 1,
+      });
+
+      const pitchDuring = await waitForCondition(
+        () => extension.getHeadPitch(),
+        (pitch) => pitch < -4,
+      );
+      expect(pitchDuring).toBeLessThan(-4);
+
+      await motionPromise;
+      const pitchAfter = await extension.getHeadPitch();
+      expectAngleCloseTo(pitchAfter, 0, 4);
+    });
+
+    test('head shake preset rotates yaw to the left before returning', async () => {
+      const motionPromise = extension.performPresetMotion({
+        MOTION: 'HEAD_SHAKE',
+        CYCLES: 1,
+      });
+
+      const yawDuring = await waitForCondition(
+        () => extension.getHeadYaw(),
+        (yaw) => yaw > 4,
+      );
+      expect(yawDuring).toBeGreaterThan(4);
+
+      await motionPromise;
+      const yawAfter = await extension.getHeadYaw();
+      expectAngleCloseTo(yawAfter, 0, 4);
+    });
+
+    test('antenna wave preset drives antennas in opposite directions', async () => {
+      const motionPromise = extension.performPresetMotion({
+        MOTION: 'ANTENNA_WAVE',
+        CYCLES: 1,
+      });
+
+      await delay(220);
+      const leftDuring = await extension.getLeftAntenna();
+      const rightDuring = await extension.getRightAntenna();
+      expect(leftDuring).toBeGreaterThan(2);
+      expect(rightDuring).toBeLessThan(-2);
+
+      await motionPromise;
+      const leftAfter = await extension.getLeftAntenna();
+      const rightAfter = await extension.getRightAntenna();
+      expectAngleCloseTo(leftAfter, 0, 4);
+      expectAngleCloseTo(rightAfter, 0, 4);
+    });
+
+    test('body sway preset couples head and body yaw', async () => {
+      const motionPromise = extension.performPresetMotion({
+        MOTION: 'BODY_SWAY',
+        CYCLES: 1,
+      });
+
+      await delay(220);
+      const headYawDuring = await extension.getHeadYaw();
+      const bodyYawDuring = await extension.getBodyYaw();
+      expect(headYawDuring).toBeGreaterThan(1);
+      expect(bodyYawDuring).toBeGreaterThan(1);
+
+      await motionPromise;
+      const bodyYawAfter = await extension.getBodyYaw();
+      expectAngleCloseTo(bodyYawAfter, 0, 4);
+    });
+  });
 
   describe('Body Control', () => {
     test('should move body yaw', async () => {

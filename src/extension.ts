@@ -6,8 +6,15 @@
 import { apiClient } from './api/client.js';
 import { degToRad, radToDeg } from './utils/angle.js';
 import { sleep } from './utils/sleep.js';
-import type { ExtensionState, HeadDirection, HeadDirectionPresets } from './types/extension.js';
-import type { MotorControlMode } from './types/api.js';
+import type {
+  ExtensionState,
+  HeadDirection,
+  HeadDirectionPresets,
+  PerformPresetMotionArgs,
+  PresetMotionDefinition,
+  PresetMotionId,
+} from './types/extension.js';
+import type { GotoRequest, MotorControlMode, XYZRPYPose } from './types/api.js';
 
 // ============================================================================
 // i18n helpers
@@ -20,6 +27,7 @@ const EN_MESSAGES = {
   'reachymini.blocks.moveHeadDirection': 'move head [DIRECTION] for [DURATION] seconds',
   'reachymini.blocks.moveHeadCustom':
     'move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s',
+  'reachymini.blocks.performPresetMotion': 'run preset motion [MOTION] [CYCLES] times',
   'reachymini.blocks.moveAntennas': 'move antennas left [LEFT]° right [RIGHT]° for [DURATION]s',
   'reachymini.blocks.moveAntennasBoth': 'move both antennas [ANGLE]° for [DURATION]s',
   'reachymini.blocks.moveBodyYaw': 'move body yaw [ANGLE]° for [DURATION]s',
@@ -41,6 +49,10 @@ const EN_MESSAGES = {
   'reachymini.menus.headDirection.upRight': 'up right',
   'reachymini.menus.headDirection.downLeft': 'down left',
   'reachymini.menus.headDirection.downRight': 'down right',
+  'reachymini.menus.motionPreset.headNod': 'head nod',
+  'reachymini.menus.motionPreset.headShake': 'head shake',
+  'reachymini.menus.motionPreset.antennaWave': 'antenna wave',
+  'reachymini.menus.motionPreset.bodySway': 'body sway',
   'reachymini.menus.motorMode.enabled': 'enabled',
   'reachymini.menus.motorMode.disabled': 'disabled',
   'reachymini.menus.motorMode.gravityComp': 'gravity compensation',
@@ -55,6 +67,7 @@ const JA_MESSAGES: Record<MessageId, string> = {
   'reachymini.blocks.moveHeadDirection': '頭を [DIRECTION] に [DURATION] 秒動かす',
   'reachymini.blocks.moveHeadCustom':
     '頭を pitch [PITCH]° yaw [YAW]° roll [ROLL]° で [DURATION] 秒動かす',
+  'reachymini.blocks.performPresetMotion': 'プリセット動作 [MOTION] を [CYCLES] 回再生する',
   'reachymini.blocks.moveAntennas': 'アンテナを 左 [LEFT]° 右 [RIGHT]° で [DURATION] 秒動かす',
   'reachymini.blocks.moveAntennasBoth': '両方のアンテナを [ANGLE]° で [DURATION] 秒動かす',
   'reachymini.blocks.moveBodyYaw': '胴体を [ANGLE]° で [DURATION] 秒動かす',
@@ -76,6 +89,10 @@ const JA_MESSAGES: Record<MessageId, string> = {
   'reachymini.menus.headDirection.upRight': 'うえ みぎ',
   'reachymini.menus.headDirection.downLeft': 'した ひだり',
   'reachymini.menus.headDirection.downRight': 'した みぎ',
+  'reachymini.menus.motionPreset.headNod': 'うなずく',
+  'reachymini.menus.motionPreset.headShake': '首をふる',
+  'reachymini.menus.motionPreset.antennaWave': 'アンテナをふる',
+  'reachymini.menus.motionPreset.bodySway': 'からだをゆらす',
   'reachymini.menus.motorMode.enabled': 'オン',
   'reachymini.menus.motorMode.disabled': 'オフ',
   'reachymini.menus.motorMode.gravityComp': '重力補償',
@@ -166,6 +183,68 @@ const HEAD_DIRECTION_PRESETS: HeadDirectionPresets = {
   CENTER: { pitch: 0, yaw: 0, roll: 0 },
 };
 
+/**
+ * Base pose used when composing preset head targets
+ */
+const BASE_HEAD_POSE: XYZRPYPose = {
+  x: 0,
+  y: 0,
+  z: 0,
+  roll: 0,
+  pitch: 0,
+  yaw: 0,
+};
+
+/**
+ * Predefined motion presets inspired by the Python examples
+ */
+const PRESET_MOTIONS: Record<PresetMotionId, PresetMotionDefinition> = {
+  HEAD_NOD: {
+    interpolation: 'ease',
+    steps: [
+      { head: { pitch: degToRad(-12) }, duration: 0.35 },
+      { head: { pitch: degToRad(12) }, duration: 0.35 },
+      { head: { pitch: 0 }, duration: 0.3 },
+    ],
+  },
+  HEAD_SHAKE: {
+    interpolation: 'ease',
+    steps: [
+      { head: { yaw: degToRad(15) }, duration: 0.35 },
+      { head: { yaw: degToRad(-15) }, duration: 0.35 },
+      { head: { yaw: 0 }, duration: 0.3 },
+    ],
+  },
+  ANTENNA_WAVE: {
+    interpolation: 'minjerk',
+    steps: [
+      { antennas: [degToRad(18), degToRad(-18)], duration: 0.4 },
+      { antennas: [degToRad(-18), degToRad(18)], duration: 0.4 },
+      { antennas: [0, 0], duration: 0.3 },
+    ],
+  },
+  BODY_SWAY: {
+    interpolation: 'cartoon',
+    steps: [
+      { head: { yaw: degToRad(5) }, bodyYaw: degToRad(8), duration: 0.45 },
+      { head: { yaw: degToRad(-5) }, bodyYaw: degToRad(-8), duration: 0.45 },
+      { head: { yaw: 0 }, bodyYaw: 0, duration: 0.3 },
+    ],
+  },
+};
+
+/**
+ * Builds a complete head pose merged with the base pose
+ */
+const buildHeadPose = (overrides?: Partial<XYZRPYPose>): XYZRPYPose => ({
+  x: overrides?.x ?? BASE_HEAD_POSE.x,
+  y: overrides?.y ?? BASE_HEAD_POSE.y,
+  z: overrides?.z ?? BASE_HEAD_POSE.z,
+  roll: overrides?.roll ?? BASE_HEAD_POSE.roll,
+  pitch: overrides?.pitch ?? BASE_HEAD_POSE.pitch,
+  yaw: overrides?.yaw ?? BASE_HEAD_POSE.yaw,
+});
+
 // ============================================================================
 // Extension Class
 // ============================================================================
@@ -251,6 +330,22 @@ export class ReachyMiniExtension {
             DURATION: {
               type: 'number',
               defaultValue: 2,
+            },
+          },
+        },
+        {
+          opcode: 'performPresetMotion',
+          blockType: 'command',
+          text: formatMessage('reachymini.blocks.performPresetMotion'),
+          arguments: {
+            MOTION: {
+              type: 'string',
+              menu: 'motionPreset',
+              defaultValue: 'HEAD_NOD',
+            },
+            CYCLES: {
+              type: 'number',
+              defaultValue: 1,
             },
           },
         },
@@ -387,6 +482,18 @@ export class ReachyMiniExtension {
               text: formatMessage('reachymini.menus.headDirection.downRight'),
               value: 'DOWN_RIGHT',
             },
+          ],
+        },
+        motionPreset: {
+          acceptReporters: true,
+          items: [
+            { text: formatMessage('reachymini.menus.motionPreset.headNod'), value: 'HEAD_NOD' },
+            { text: formatMessage('reachymini.menus.motionPreset.headShake'), value: 'HEAD_SHAKE' },
+            {
+              text: formatMessage('reachymini.menus.motionPreset.antennaWave'),
+              value: 'ANTENNA_WAVE',
+            },
+            { text: formatMessage('reachymini.menus.motionPreset.bodySway'), value: 'BODY_SWAY' },
           ],
         },
         motorMode: {
@@ -552,6 +659,56 @@ export class ReachyMiniExtension {
       await sleep(duration * 1000 + 200);
     } catch (error) {
       console.error('Failed to move head with custom angles:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Run predefined motion presets for easier animation
+   */
+  async performPresetMotion(args: PerformPresetMotionArgs): Promise<void> {
+    try {
+      const presetId = (args.MOTION as PresetMotionId) ?? 'HEAD_NOD';
+      const preset = PRESET_MOTIONS[presetId];
+      if (!preset) {
+        throw new Error(`Invalid preset motion: ${presetId}`);
+      }
+
+      const cyclesInput = Number(args.CYCLES);
+      const cycles = Number.isFinite(cyclesInput) ? Math.max(1, Math.floor(cyclesInput)) : 1;
+
+      for (let cycle = 0; cycle < cycles; cycle += 1) {
+        for (const step of preset.steps) {
+          const duration = Math.max(0.1, step.duration);
+          const request: GotoRequest = {
+            duration,
+            interpolation: preset.interpolation,
+          };
+
+          if (step.head) {
+            request.head_pose = buildHeadPose(step.head);
+          }
+
+          if (step.antennas) {
+            request.antennas = step.antennas;
+          }
+
+          if (typeof step.bodyYaw === 'number') {
+            request.body_yaw = step.bodyYaw;
+          }
+
+          if (!request.head_pose && !request.antennas && typeof request.body_yaw !== 'number') {
+            await sleep(duration * 1000);
+            continue;
+          }
+
+          const result = await apiClient.goto(request);
+          this.state.currentMoveUuid = result.uuid;
+          await sleep(duration * 1000 + 150);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to run preset motion:', error);
       throw error;
     }
   }
