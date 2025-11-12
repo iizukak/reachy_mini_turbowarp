@@ -17,5 +17,8 @@ export default defineConfig({
         singleFork: true,
       },
     },
+
+    // Force sequential execution of test files
+    fileParallelism: false,
   },
 });

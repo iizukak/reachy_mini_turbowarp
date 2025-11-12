@@ -63,8 +63,9 @@ export async function resetRobotPose(): Promise<void> {
   // Wait for movement to complete with polling
   await waitForMovement(2.0);
 
-  // Additional settling time to ensure robot is completely stopped
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // Additional settling time to ensure robot is completely stopped and state is updated
+  // Increased to 2000ms to allow simulator and state cache to fully settle
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 }
 
 /**
