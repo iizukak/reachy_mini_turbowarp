@@ -5,6 +5,7 @@
 
 import { apiClient } from './api/client.js';
 import { degToRad, radToDeg } from './utils/angle.js';
+import { sleep } from './utils/sleep.js';
 import type { ExtensionState, HeadDirection, HeadDirectionPresets } from './types/extension.js';
 import type { MotorControlMode } from './types/api.js';
 
@@ -389,11 +390,32 @@ export class ReachyMiniExtension {
 
   /**
    * Wake up the robot
+   * Waits for animation to complete using polling
    */
   async wakeUp(): Promise<void> {
     try {
       const result = await apiClient.wakeUp();
       this.state.currentMoveUuid = result.uuid;
+
+      // Wait for animation to start
+      await sleep(300);
+
+      // Poll until animation completes (max 10 seconds)
+      const maxWaitTime = 10000;
+      const pollInterval = 200;
+      const startTime = Date.now();
+
+      while (Date.now() - startTime < maxWaitTime) {
+        const isRunning = await apiClient.isMovementRunning();
+        if (!isRunning) {
+          // Animation complete, wait a bit for settling
+          await sleep(200);
+          return;
+        }
+        await sleep(pollInterval);
+      }
+
+      console.warn('Wake up animation did not complete within timeout');
     } catch (error) {
       console.error('Failed to wake up robot:', error);
       throw error;
@@ -402,11 +424,32 @@ export class ReachyMiniExtension {
 
   /**
    * Put the robot to sleep
+   * Waits for animation to complete using polling
    */
   async gotoSleep(): Promise<void> {
     try {
       const result = await apiClient.gotoSleep();
       this.state.currentMoveUuid = result.uuid;
+
+      // Wait for animation to start
+      await sleep(300);
+
+      // Poll until animation completes (max 10 seconds)
+      const maxWaitTime = 10000;
+      const pollInterval = 200;
+      const startTime = Date.now();
+
+      while (Date.now() - startTime < maxWaitTime) {
+        const isRunning = await apiClient.isMovementRunning();
+        if (!isRunning) {
+          // Animation complete, wait a bit for settling
+          await sleep(200);
+          return;
+        }
+        await sleep(pollInterval);
+      }
+
+      console.warn('Go to sleep animation did not complete within timeout');
     } catch (error) {
       console.error('Failed to put robot to sleep:', error);
       throw error;
@@ -419,6 +462,7 @@ export class ReachyMiniExtension {
 
   /**
    * Move head to a predefined direction
+   * Waits for movement to complete
    */
   async moveHeadDirection(args: { DIRECTION: HeadDirection; DURATION: number }): Promise<void> {
     try {
@@ -444,6 +488,8 @@ export class ReachyMiniExtension {
       });
 
       this.state.currentMoveUuid = result.uuid;
+      // Wait for movement to complete (duration + 200ms buffer)
+      await sleep(duration * 1000 + 200);
     } catch (error) {
       console.error('Failed to move head:', error);
       throw error;
@@ -452,6 +498,7 @@ export class ReachyMiniExtension {
 
   /**
    * Move head with custom angles (degrees input)
+   * Waits for movement to complete
    */
   async moveHeadCustom(args: {
     PITCH: number;
@@ -479,6 +526,8 @@ export class ReachyMiniExtension {
       });
 
       this.state.currentMoveUuid = result.uuid;
+      // Wait for movement to complete (duration + 200ms buffer)
+      await sleep(duration * 1000 + 200);
     } catch (error) {
       console.error('Failed to move head with custom angles:', error);
       throw error;
@@ -491,6 +540,7 @@ export class ReachyMiniExtension {
 
   /**
    * Move antennas individually (degrees input)
+   * Waits for movement to complete
    */
   async moveAntennas(args: { LEFT: number; RIGHT: number; DURATION: number }): Promise<void> {
     try {
@@ -505,6 +555,8 @@ export class ReachyMiniExtension {
       });
 
       this.state.currentMoveUuid = result.uuid;
+      // Wait for movement to complete (duration + 200ms buffer)
+      await sleep(duration * 1000 + 200);
     } catch (error) {
       console.error('Failed to move antennas:', error);
       throw error;
@@ -513,6 +565,7 @@ export class ReachyMiniExtension {
 
   /**
    * Move both antennas symmetrically (degrees input)
+   * Waits for movement to complete
    */
   async moveAntennasBoth(args: { ANGLE: number; DURATION: number }): Promise<void> {
     try {
@@ -526,6 +579,8 @@ export class ReachyMiniExtension {
       });
 
       this.state.currentMoveUuid = result.uuid;
+      // Wait for movement to complete (duration + 200ms buffer)
+      await sleep(duration * 1000 + 200);
     } catch (error) {
       console.error('Failed to move both antennas:', error);
       throw error;

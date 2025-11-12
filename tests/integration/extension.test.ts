@@ -273,9 +273,9 @@ describe('Extension Integration Tests', () => {
         PITCH: 0,
         YAW: 15,
         ROLL: 0,
-        DURATION: 2.5,
+        DURATION: 0.8,
       });
-      await waitForMovement(2.5);
+      await waitForMovement(0.8);
 
       const yaw = await extension.getHeadYaw();
 
@@ -296,9 +296,9 @@ describe('Extension Integration Tests', () => {
       await extension.moveAntennas({
         LEFT: 20,
         RIGHT: 0,
-        DURATION: 2.5,
+        DURATION: 0.8,
       });
-      await waitForMovement(2.5);
+      await waitForMovement(0.8);
 
       const angle = await extension.getLeftAntenna();
 
@@ -311,9 +311,9 @@ describe('Extension Integration Tests', () => {
       await extension.moveAntennas({
         LEFT: 0,
         RIGHT: -20,
-        DURATION: 2.5,
+        DURATION: 0.8,
       });
-      await waitForMovement(2.5);
+      await waitForMovement(0.8);
 
       const angle = await extension.getRightAntenna();
 

@@ -311,11 +311,12 @@ reachy_mini_turbowarp/
 │   │   ├── api.ts           # REST API型定義
 │   │   └── extension.ts     # 拡張機能内部型定義
 │   ├── utils/
-│   │   └── angle.ts         # 角度変換ユーティリティ
+│   │   ├── angle.ts         # 角度変換ユーティリティ
+│   │   └── sleep.ts         # 非同期待機ユーティリティ
 │   ├── extension.ts         # Scratch拡張機能クラス
 │   └── index.ts             # エントリーポイント
 ├── dist/
-│   ├── extension.js         # ビルド成果物（9.82 kB）
+│   ├── extension.js         # ビルド成果物（14.29 kB）
 │   └── extension.js.map     # ソースマップ
 ├── tests/
 │   └── unit/
@@ -351,6 +352,10 @@ TurboWarp拡張機能の内部型定義：
 角度変換ユーティリティ：
 - `degToRad(degrees: number): number` - 度数法 → ラジアン
 - `radToDeg(radians: number): number` - ラジアン → 度数法
+
+#### src/utils/sleep.ts
+非同期待機ユーティリティ：
+- `sleep(ms: number): Promise<void>` - 指定ミリ秒だけ待機する
 
 #### tests/unit/utils/angle.test.ts
 角度変換の包括的なユニットテスト：
@@ -400,9 +405,33 @@ Scratch拡張機能の実装（英語版のみ）：
 - **IIFE パターン**: 即時実行関数で安全にラップ
 
 #### ビルド成果物
-- **dist/extension.js**: 9.82 kB (gzip: 2.55 kB)
+- **dist/extension.js**: 14.66 kB (gzip: 3.66 kB)
 - **フォーマット**: IIFE（Immediately Invoked Function Expression）
-- **ソースマップ**: 有効（37.98 kB）
+- **ソースマップ**: 有効（49.52 kB）
+
+#### 動作完了の待機ロジック（重要！）
+
+**問題**: TurboWarpから連続して動作ブロックを実行すると、音声再生（PortAudio）が適切に終了する前に次の動作が開始され、daemonがクラッシュする問題がありました。
+
+**解決策**: 各動作ブロックに、動作が完了するまで待機するロジックを実装：
+
+- **wake_up / goto_sleep**: ポーリングベース（`isMovementRunning()`を200ms間隔でチェック、最大10秒）
+  - 動作開始まで300ms待機
+  - 完了後200ms待機（settling time）
+
+- **goto系ブロック**: `duration * 1000 + 200`ms 待機（動作時間 + 200msバッファ）
+
+これにより、ユーザーがScratchスクリプトで明示的に`wait`ブロックを追加しなくても、拡張機能が自動的に動作の完了を待つようになりました。
+
+**パフォーマンス最適化**:
+- 統合テスト実行時間: 200秒 → **約30秒**（6倍以上の高速化）
+- test-utils: `MOVE_COMPLETION_BUFFER` を 3000ms → 200ms に短縮
+- テストの動作時間: 2.5秒 → 0.8秒に短縮
+
+**実装箇所**:
+- `src/utils/sleep.ts`: 待機用ユーティリティ関数
+- `src/extension.ts`: 各動作ブロック（`wakeUp`, `gotoSleep`, `moveHeadDirection`, `moveHeadCustom`, `moveAntennas`, `moveAntennasBoth`）に待機ロジックを追加
+- `tests/integration/test-utils.ts`: 高速化されたテストユーティリティ
 
 ### ⏸️ Phase 4: 多言語対応（未着手）
 

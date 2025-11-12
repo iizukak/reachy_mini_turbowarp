@@ -5,7 +5,7 @@
 
 const API_BASE = 'http://localhost:8000/api';
 const DAEMON_CHECK_TIMEOUT = 10000; // 10 seconds
-const MOVE_COMPLETION_BUFFER = 3000; // Extra 3000ms after duration for simulator
+const MOVE_COMPLETION_BUFFER = 200; // Extra 200ms after duration for simulator (fast)
 
 /**
  * Wait for daemon to be ready
@@ -51,7 +51,7 @@ export async function resetRobotPose(): Promise<void> {
       },
       antennas: [0, 0],
       body_yaw: 0,
-      duration: 2.0,
+      duration: 0.8,
       interpolation: 'minjerk',
     }),
   });
@@ -61,11 +61,11 @@ export async function resetRobotPose(): Promise<void> {
   }
 
   // Wait for movement to complete with polling
-  await waitForMovement(2.0);
+  await waitForMovement(0.8);
 
   // Additional settling time to ensure robot is completely stopped and state is updated
-  // Increased to 2000ms to allow simulator and state cache to fully settle
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  // Reduced to 300ms for faster test execution
+  await new Promise((resolve) => setTimeout(resolve, 300));
 }
 
 /**
@@ -85,8 +85,8 @@ export async function waitForMovement(durationSeconds: number): Promise<void> {
   while (Date.now() - startTime < maxPollTime) {
     const isRunning = await isMovementRunning();
     if (!isRunning) {
-      // Movement stopped, wait a bit more for settling
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // Movement stopped, wait a bit more for settling (reduced from 300ms to 100ms)
+      await new Promise((resolve) => setTimeout(resolve, 100));
       return;
     }
     await new Promise((resolve) => setTimeout(resolve, pollInterval));
@@ -112,8 +112,8 @@ export async function waitForAnimation(): Promise<void> {
   while (Date.now() - startTime < maxPollTime) {
     const isRunning = await isMovementRunning();
     if (!isRunning) {
-      // Animation stopped, wait for settling
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Animation stopped, wait for settling (reduced from 500ms to 200ms)
+      await new Promise((resolve) => setTimeout(resolve, 200));
       return;
     }
     await new Promise((resolve) => setTimeout(resolve, pollInterval));

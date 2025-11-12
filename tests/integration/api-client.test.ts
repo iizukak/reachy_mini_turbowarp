@@ -105,14 +105,14 @@ describe('API Client Integration Tests', () => {
     test('should move antennas individually', async () => {
       const result = await apiClient.goto({
         antennas: [0.4, -0.4], // Left up, right down
-        duration: 2.5,
+        duration: 0.8,
         interpolation: 'minjerk',
       });
 
       expect(result.uuid).toBeDefined();
 
       // Wait for movement to complete
-      await waitForMovement(2.5);
+      await waitForMovement(0.8);
 
       // Verify state
       const state = await getRobotState();
@@ -181,7 +181,7 @@ describe('API Client Integration Tests', () => {
           yaw: 0,
           roll: 0,
         },
-        duration: 3.0,
+        duration: 1.2,
         interpolation: 'minjerk',
       });
 
@@ -190,7 +190,7 @@ describe('API Client Integration Tests', () => {
       expect(typeof isRunning).toBe('boolean');
 
       // Wait for completion
-      await waitForMovement(3.0);
+      await waitForMovement(1.2);
 
       // Check again - should be stopped
       const isStillRunning = await apiClient.isMovementRunning();
