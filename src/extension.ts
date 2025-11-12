@@ -9,6 +9,139 @@ import type { ExtensionState, HeadDirection, HeadDirectionPresets } from './type
 import type { MotorControlMode } from './types/api.js';
 
 // ============================================================================
+// i18n helpers
+// ============================================================================
+
+const EN_MESSAGES = {
+  'reachymini.extension.name': 'Reachy Mini',
+  'reachymini.blocks.wakeUp': 'wake up robot',
+  'reachymini.blocks.gotoSleep': 'put robot to sleep',
+  'reachymini.blocks.moveHeadDirection': 'move head [DIRECTION] for [DURATION] seconds',
+  'reachymini.blocks.moveHeadCustom':
+    'move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s',
+  'reachymini.blocks.moveAntennas': 'move antennas left [LEFT]° right [RIGHT]° for [DURATION]s',
+  'reachymini.blocks.moveAntennasBoth': 'move both antennas [ANGLE]° for [DURATION]s',
+  'reachymini.blocks.setMotorMode': 'set motor mode [MODE]',
+  'reachymini.blocks.getHeadPitch': 'head pitch (degrees)',
+  'reachymini.blocks.getHeadYaw': 'head yaw (degrees)',
+  'reachymini.blocks.getHeadRoll': 'head roll (degrees)',
+  'reachymini.blocks.getLeftAntenna': 'left antenna angle (degrees)',
+  'reachymini.blocks.getRightAntenna': 'right antenna angle (degrees)',
+  'reachymini.blocks.getBodyYaw': 'body yaw (degrees)',
+  'reachymini.blocks.getMotorMode': 'motor mode',
+  'reachymini.blocks.isDaemonConnected': 'daemon connected?',
+  'reachymini.menus.headDirection.center': 'center',
+  'reachymini.menus.headDirection.up': 'up',
+  'reachymini.menus.headDirection.down': 'down',
+  'reachymini.menus.headDirection.left': 'left',
+  'reachymini.menus.headDirection.right': 'right',
+  'reachymini.menus.headDirection.upLeft': 'up left',
+  'reachymini.menus.headDirection.upRight': 'up right',
+  'reachymini.menus.headDirection.downLeft': 'down left',
+  'reachymini.menus.headDirection.downRight': 'down right',
+  'reachymini.menus.motorMode.enabled': 'enabled',
+  'reachymini.menus.motorMode.disabled': 'disabled',
+  'reachymini.menus.motorMode.gravityComp': 'gravity compensation',
+} as const;
+
+type MessageId = keyof typeof EN_MESSAGES;
+
+const JA_MESSAGES: Record<MessageId, string> = {
+  'reachymini.extension.name': 'Reachy Mini',
+  'reachymini.blocks.wakeUp': 'ロボットを起こす',
+  'reachymini.blocks.gotoSleep': 'ロボットを寝かせる',
+  'reachymini.blocks.moveHeadDirection': '頭を [DIRECTION] に [DURATION] 秒動かす',
+  'reachymini.blocks.moveHeadCustom':
+    '頭を pitch [PITCH]° yaw [YAW]° roll [ROLL]° で [DURATION] 秒動かす',
+  'reachymini.blocks.moveAntennas': 'アンテナを 左 [LEFT]° 右 [RIGHT]° で [DURATION] 秒動かす',
+  'reachymini.blocks.moveAntennasBoth': '両方のアンテナを [ANGLE]° で [DURATION] 秒動かす',
+  'reachymini.blocks.setMotorMode': 'モーターを [MODE] モードにする',
+  'reachymini.blocks.getHeadPitch': '頭のピッチ角 (度)',
+  'reachymini.blocks.getHeadYaw': '頭のヨー角 (度)',
+  'reachymini.blocks.getHeadRoll': '頭のロール角 (度)',
+  'reachymini.blocks.getLeftAntenna': '左アンテナ角度 (度)',
+  'reachymini.blocks.getRightAntenna': '右アンテナ角度 (度)',
+  'reachymini.blocks.getBodyYaw': '胴体のヨー角 (度)',
+  'reachymini.blocks.getMotorMode': 'モード',
+  'reachymini.blocks.isDaemonConnected': 'デーモン接続中？',
+  'reachymini.menus.headDirection.center': 'まんなか',
+  'reachymini.menus.headDirection.up': 'うえ',
+  'reachymini.menus.headDirection.down': 'した',
+  'reachymini.menus.headDirection.left': 'ひだり',
+  'reachymini.menus.headDirection.right': 'みぎ',
+  'reachymini.menus.headDirection.upLeft': 'うえ ひだり',
+  'reachymini.menus.headDirection.upRight': 'うえ みぎ',
+  'reachymini.menus.headDirection.downLeft': 'した ひだり',
+  'reachymini.menus.headDirection.downRight': 'した みぎ',
+  'reachymini.menus.motorMode.enabled': 'オン',
+  'reachymini.menus.motorMode.disabled': 'オフ',
+  'reachymini.menus.motorMode.gravityComp': '重力補償',
+};
+
+const TRANSLATIONS: Record<'en' | 'ja', Record<MessageId, string>> = {
+  en: EN_MESSAGES,
+  ja: JA_MESSAGES,
+};
+
+type ScratchTranslate = {
+  (message: string, variables?: Record<string, string>): string;
+  setup?: (translations: Record<string, Record<string, string>>) => void;
+  language?: string;
+};
+
+type ScratchGlobal = {
+  translate?: ScratchTranslate;
+  vm?: {
+    runtime?: {
+      getLocale?: () => string;
+    };
+  };
+};
+
+const getScratch = (): ScratchGlobal | undefined =>
+  (globalThis as { Scratch?: ScratchGlobal }).Scratch;
+
+const setupTranslations = (): void => {
+  const scratch = getScratch();
+  if (!scratch || typeof scratch.translate !== 'function') {
+    return;
+  }
+
+  const translateFn = scratch.translate;
+  const currentLanguage = translateFn.language ?? 'unknown';
+  const runtimeLocale = scratch.vm?.runtime?.getLocale?.();
+  console.warn('[ReachyMiniExtension] Translation setup', {
+    scratchTranslateLanguage: currentLanguage,
+    runtimeLocale: runtimeLocale ?? 'unavailable',
+  });
+
+  if (typeof translateFn.setup === 'function') {
+    translateFn.setup(TRANSLATIONS);
+  }
+};
+
+const resolveLocale = (): keyof typeof TRANSLATIONS => {
+  const scratch = getScratch();
+  const runtimeLocale = scratch?.vm?.runtime?.getLocale?.();
+  if (runtimeLocale && runtimeLocale in TRANSLATIONS) {
+    return runtimeLocale as keyof typeof TRANSLATIONS;
+  }
+
+  const translatorLocale = scratch?.translate?.language;
+  if (translatorLocale && translatorLocale in TRANSLATIONS) {
+    return translatorLocale as keyof typeof TRANSLATIONS;
+  }
+
+  return 'en';
+};
+
+const formatMessage = (id: MessageId): string => {
+  const locale = resolveLocale();
+  const messages = TRANSLATIONS[locale] ?? EN_MESSAGES;
+  return messages[id] ?? EN_MESSAGES[id];
+};
+
+// ============================================================================
 // Constants
 // ============================================================================
 
@@ -41,6 +174,8 @@ export class ReachyMiniExtension {
   private state: ExtensionState;
 
   constructor() {
+    setupTranslations();
+
     this.state = {
       connectionStatus: 'disconnected',
       apiBaseUrl: 'http://localhost:8000/api',
@@ -56,7 +191,7 @@ export class ReachyMiniExtension {
   getInfo(): ExtensionInfo {
     return {
       id: 'reachymini',
-      name: 'Reachy Mini',
+      name: formatMessage('reachymini.extension.name'),
       color1: '#4C97FF',
       color2: '#3373CC',
       color3: '#2E5BA6',
@@ -65,12 +200,12 @@ export class ReachyMiniExtension {
         {
           opcode: 'wakeUp',
           blockType: 'command',
-          text: 'wake up robot',
+          text: formatMessage('reachymini.blocks.wakeUp'),
         },
         {
           opcode: 'gotoSleep',
           blockType: 'command',
-          text: 'put robot to sleep',
+          text: formatMessage('reachymini.blocks.gotoSleep'),
         },
         '---',
 
@@ -78,7 +213,7 @@ export class ReachyMiniExtension {
         {
           opcode: 'moveHeadDirection',
           blockType: 'command',
-          text: 'move head [DIRECTION] for [DURATION] seconds',
+          text: formatMessage('reachymini.blocks.moveHeadDirection'),
           arguments: {
             DIRECTION: {
               type: 'string',
@@ -96,7 +231,7 @@ export class ReachyMiniExtension {
         {
           opcode: 'moveHeadCustom',
           blockType: 'command',
-          text: 'move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s',
+          text: formatMessage('reachymini.blocks.moveHeadCustom'),
           arguments: {
             PITCH: {
               type: 'number',
@@ -122,7 +257,7 @@ export class ReachyMiniExtension {
         {
           opcode: 'moveAntennas',
           blockType: 'command',
-          text: 'move antennas left [LEFT]° right [RIGHT]° for [DURATION]s',
+          text: formatMessage('reachymini.blocks.moveAntennas'),
           arguments: {
             LEFT: {
               type: 'number',
@@ -141,7 +276,7 @@ export class ReachyMiniExtension {
         {
           opcode: 'moveAntennasBoth',
           blockType: 'command',
-          text: 'move both antennas [ANGLE]° for [DURATION]s',
+          text: formatMessage('reachymini.blocks.moveAntennasBoth'),
           arguments: {
             ANGLE: {
               type: 'number',
@@ -159,7 +294,7 @@ export class ReachyMiniExtension {
         {
           opcode: 'setMotorMode',
           blockType: 'command',
-          text: 'set motor mode [MODE]',
+          text: formatMessage('reachymini.blocks.setMotorMode'),
           arguments: {
             MODE: {
               type: 'string',
@@ -174,37 +309,37 @@ export class ReachyMiniExtension {
         {
           opcode: 'getHeadPitch',
           blockType: 'reporter',
-          text: 'head pitch (degrees)',
+          text: formatMessage('reachymini.blocks.getHeadPitch'),
         },
         {
           opcode: 'getHeadYaw',
           blockType: 'reporter',
-          text: 'head yaw (degrees)',
+          text: formatMessage('reachymini.blocks.getHeadYaw'),
         },
         {
           opcode: 'getHeadRoll',
           blockType: 'reporter',
-          text: 'head roll (degrees)',
+          text: formatMessage('reachymini.blocks.getHeadRoll'),
         },
         {
           opcode: 'getLeftAntenna',
           blockType: 'reporter',
-          text: 'left antenna angle (degrees)',
+          text: formatMessage('reachymini.blocks.getLeftAntenna'),
         },
         {
           opcode: 'getRightAntenna',
           blockType: 'reporter',
-          text: 'right antenna angle (degrees)',
+          text: formatMessage('reachymini.blocks.getRightAntenna'),
         },
         {
           opcode: 'getBodyYaw',
           blockType: 'reporter',
-          text: 'body yaw (degrees)',
+          text: formatMessage('reachymini.blocks.getBodyYaw'),
         },
         {
           opcode: 'getMotorMode',
           blockType: 'reporter',
-          text: 'motor mode',
+          text: formatMessage('reachymini.blocks.getMotorMode'),
         },
         '---',
 
@@ -212,30 +347,36 @@ export class ReachyMiniExtension {
         {
           opcode: 'isDaemonConnected',
           blockType: 'Boolean',
-          text: 'daemon connected?',
+          text: formatMessage('reachymini.blocks.isDaemonConnected'),
         },
       ],
       menus: {
         headDirection: {
           acceptReporters: true,
           items: [
-            { text: 'center', value: 'CENTER' },
-            { text: 'up', value: 'UP' },
-            { text: 'down', value: 'DOWN' },
-            { text: 'left', value: 'LEFT' },
-            { text: 'right', value: 'RIGHT' },
-            { text: 'up left', value: 'UP_LEFT' },
-            { text: 'up right', value: 'UP_RIGHT' },
-            { text: 'down left', value: 'DOWN_LEFT' },
-            { text: 'down right', value: 'DOWN_RIGHT' },
+            { text: formatMessage('reachymini.menus.headDirection.center'), value: 'CENTER' },
+            { text: formatMessage('reachymini.menus.headDirection.up'), value: 'UP' },
+            { text: formatMessage('reachymini.menus.headDirection.down'), value: 'DOWN' },
+            { text: formatMessage('reachymini.menus.headDirection.left'), value: 'LEFT' },
+            { text: formatMessage('reachymini.menus.headDirection.right'), value: 'RIGHT' },
+            { text: formatMessage('reachymini.menus.headDirection.upLeft'), value: 'UP_LEFT' },
+            { text: formatMessage('reachymini.menus.headDirection.upRight'), value: 'UP_RIGHT' },
+            { text: formatMessage('reachymini.menus.headDirection.downLeft'), value: 'DOWN_LEFT' },
+            {
+              text: formatMessage('reachymini.menus.headDirection.downRight'),
+              value: 'DOWN_RIGHT',
+            },
           ],
         },
         motorMode: {
           acceptReporters: true,
           items: [
-            { text: 'enabled', value: 'enabled' },
-            { text: 'disabled', value: 'disabled' },
-            { text: 'gravity compensation', value: 'gravity_compensation' },
+            { text: formatMessage('reachymini.menus.motorMode.enabled'), value: 'enabled' },
+            { text: formatMessage('reachymini.menus.motorMode.disabled'), value: 'disabled' },
+            {
+              text: formatMessage('reachymini.menus.motorMode.gravityComp'),
+              value: 'gravity_compensation',
+            },
           ],
         },
       },
