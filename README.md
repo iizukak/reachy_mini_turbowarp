@@ -25,6 +25,8 @@ Custom TurboWarp/Scratch 3.0 extension for controlling the Reachy Mini robot.
    TBD
    ```
 
+   **Note:** jsDelivr may cache files for up to 24 hours. If you need the absolute latest build immediately, download `extension.js` directly from the [gh-pages branch](https://github.com/iizukak/reachy_mini_turbowarp/tree/gh-pages) and load it as a local file in TurboWarp.
+
 2. In TurboWarp:
    - Open the Extensions menu → "Custom Extension".
    - Paste one of the jsDelivr URLs above.
