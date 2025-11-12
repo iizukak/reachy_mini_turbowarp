@@ -13,13 +13,22 @@ Custom TurboWarp/Scratch 3.0 extension for controlling the Reachy Mini robot.
 
 ## Usage
 
-1. Build artifacts are published automatically to GitHub Pages and exposed through jsDelivr.  
-   Latest bundle:  
-   `https://cdn.jsdelivr.net/gh/iizukak/reachy_mini_turbowarp@gh-pages/extension.js`
+1. Build artifacts are published automatically via GitHub Actions and exposed through jsDelivr.
+
+   **Latest version (from gh-pages):**
+   ```
+   https://cdn.jsdelivr.net/gh/iizukak/reachy_mini_turbowarp@gh-pages/extension.js
+   ```
+
+   **Specific version (recommended for production):**
+   ```
+   https://cdn.jsdelivr.net/gh/iizukak/reachy_mini_turbowarp@v0.2.0/dist/extension.js
+   ```
+
 2. In TurboWarp:
-   - Open the Extensions menu → “Custom Extension”.
-   - Paste the jsDelivr URL above.
-   - The `reachy_mini_turbowarp` blocks will appear; confirm the daemon is running to execute the blocks.
+   - Open the Extensions menu → "Custom Extension".
+   - Paste one of the jsDelivr URLs above.
+   - The **Reachy Mini** blocks will appear; confirm the daemon is running to execute the blocks.
 
 ## Developer Guide
 
