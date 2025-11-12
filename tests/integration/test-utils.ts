@@ -37,8 +37,6 @@ export async function waitForDaemon(timeoutMs: number = DAEMON_CHECK_TIMEOUT): P
  * Reset robot to default pose
  */
 export async function resetRobotPose(): Promise<void> {
-  await wakeRobot();
-
   const response = await fetch(`${API_BASE}/move/goto`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -122,22 +120,6 @@ export async function waitForAnimation(): Promise<void> {
 
   // If we get here, animation is still running after max wait time
   console.warn(`Animation still running after ${maxPollTime}ms`);
-}
-
-/**
- * Ensure the robot is awake before running motions.
- */
-export async function wakeRobot(): Promise<void> {
-  const response = await fetch(`${API_BASE}/move/play/wake_up`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to wake up robot: ${response.status}`);
-  }
-
-  await waitForAnimation();
 }
 
 /**
