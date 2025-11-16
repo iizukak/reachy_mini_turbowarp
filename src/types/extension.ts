@@ -191,7 +191,6 @@ export interface MoveAntennasBothArgs {
  * Arguments for playRecordedMoveDataset block
  */
 export interface PlayRecordedMoveArgs {
-  DATASET: string;
   MOVE: string;
 }
 

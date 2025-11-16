@@ -28,7 +28,8 @@ const EN_MESSAGES = {
   'reachymini.blocks.moveHeadDirection': 'move head [DIRECTION] for [DURATION] seconds',
   'reachymini.blocks.moveHeadCustom':
     'move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s',
-  'reachymini.blocks.playRecordedMove': 'play recorded move dataset [DATASET] move [MOVE]',
+  'reachymini.blocks.playRecordedMove': 'play recorded move [MOVE]',
+  'reachymini.menus.recordedMove.empty': 'no moves available',
   'reachymini.blocks.performPresetMotion': 'run preset motion [MOTION] [CYCLES] times',
   'reachymini.blocks.moveAntennas': 'move antennas left [LEFT]° right [RIGHT]° for [DURATION]s',
   'reachymini.blocks.moveAntennasBoth': 'move both antennas [ANGLE]° for [DURATION]s',
@@ -71,7 +72,8 @@ const JA_MESSAGES: Record<MessageId, string> = {
   'reachymini.blocks.moveHeadDirection': '頭を [DIRECTION] に [DURATION] 秒動かす',
   'reachymini.blocks.moveHeadCustom':
     '頭を pitch [PITCH]° yaw [YAW]° roll [ROLL]° で [DURATION] 秒動かす',
-  'reachymini.blocks.playRecordedMove': '録画モーション [DATASET] の [MOVE] を再生する',
+  'reachymini.blocks.playRecordedMove': '録画モーション [MOVE] を再生する',
+  'reachymini.menus.recordedMove.empty': 'モーションが見つかりません',
   'reachymini.blocks.performPresetMotion': 'プリセット動作 [MOTION] を [CYCLES] 回再生する',
   'reachymini.blocks.moveAntennas': 'アンテナを 左 [LEFT]° 右 [RIGHT]° で [DURATION] 秒動かす',
   'reachymini.blocks.moveAntennasBoth': '両方のアンテナを [ANGLE]° で [DURATION] 秒動かす',
@@ -257,7 +259,152 @@ const buildHeadPose = (overrides?: Partial<XYZRPYPose>): XYZRPYPose => ({
  */
 const DEFAULT_RECORDED_DATASET = 'pollen-robotics/reachy-mini-dances-library';
 const EMOTIONS_RECORDED_DATASET = 'pollen-robotics/reachy-mini-emotions-library';
-const DEFAULT_RECORDED_MOVE = 'wave';
+const DANCE_RECORDED_MOVES = [
+  'groovy_sway_and_roll',
+  'headbanger_combo',
+  'uh_huh_tilt',
+  'side_to_side_sway',
+  'dizzy_spin',
+  'neck_recoil',
+  'jackson_square',
+  'side_peekaboo',
+  'sharp_side_tilt',
+  'chin_lead',
+  'stumble_and_recover',
+  'head_tilt_roll',
+  'yeah_nod',
+  'interwoven_spirals',
+  'chicken_peck',
+  'simple_nod',
+  'polyrhythm_combo',
+  'grid_snap',
+  'side_glance_flick',
+  'pendulum_swing',
+] as const;
+const EMOTIONS_RECORDED_MOVES = [
+  'dance3',
+  'displeased1',
+  'welcoming1',
+  'surprised1',
+  'reprimand3',
+  'dance1',
+  'disgusted1',
+  'curious1',
+  'contempt1',
+  'sad2',
+  'thoughtful2',
+  'enthusiastic2',
+  'understanding1',
+  'amazed1',
+  'impatient2',
+  'success2',
+  'grateful1',
+  'scared1',
+  'inquiring2',
+  'success1',
+  'indifferent1',
+  'displeased2',
+  'thoughtful1',
+  'reprimand2',
+  'fear1',
+  'no1',
+  'cheerful1',
+  'shy1',
+  'downcast1',
+  'boredom1',
+  'laughing1',
+  'irritated1',
+  'lost1',
+  'frustrated1',
+  'exhausted1',
+  'irritated2',
+  'dance2',
+  'dying1',
+  'confused1',
+  'inquiring1',
+  'proud3',
+  'relief1',
+  'enthusiastic1',
+  'attentive1',
+  'calming1',
+  'reprimand1',
+  'attentive2',
+  'uncertain1',
+  'oops1',
+  'boredom2',
+  'surprised2',
+  'uncomfortable1',
+  'sleep1',
+  'furious1',
+  'resigned1',
+  'helpful1',
+  'proud1',
+  'come1',
+  'go_away1',
+  'lonely1',
+  'yes_sad1',
+  'inquiring3',
+  'incomprehensible2',
+  'electric1',
+  'welcoming2',
+  'rage1',
+  'oops2',
+  'anxiety1',
+  'understanding2',
+  'laughing2',
+  'no_excited1',
+  'helpful2',
+  'relief2',
+  'yes1',
+  'proud2',
+  'sad1',
+  'loving1',
+  'impatient1',
+  'tired1',
+  'serenity1',
+  'no_sad1',
+] as const;
+const RECORDED_DATASET_LABELS: Record<string, MessageId> = {
+  [DEFAULT_RECORDED_DATASET]: 'reachymini.menus.recordedDataset.dances',
+  [EMOTIONS_RECORDED_DATASET]: 'reachymini.menus.recordedDataset.emotions',
+};
+const RECORDED_MOVE_VALUE_SEPARATOR = '||';
+
+const encodeRecordedMoveSelection = (dataset: string, move: string): string =>
+  `${dataset}${RECORDED_MOVE_VALUE_SEPARATOR}${move}`;
+
+const decodeRecordedMoveSelection = (value?: string): { dataset: string; move: string } => {
+  if (!value) {
+    return {
+      dataset: DEFAULT_RECORDED_DATASET,
+      move: DANCE_RECORDED_MOVES[0],
+    };
+  }
+
+  if (value.includes(RECORDED_MOVE_VALUE_SEPARATOR)) {
+    const [dataset, move] = value.split(RECORDED_MOVE_VALUE_SEPARATOR);
+    if (dataset && move) {
+      return { dataset, move };
+    }
+  }
+
+  // Fallback for manual input (move name only, assume default dataset)
+  return {
+    dataset: DEFAULT_RECORDED_DATASET,
+    move: value.trim() || DANCE_RECORDED_MOVES[0],
+  };
+};
+
+const buildRecordedMoveMenuItems = (): { dataset: string; move: string }[] => [
+  ...DANCE_RECORDED_MOVES.map((move) => ({
+    dataset: DEFAULT_RECORDED_DATASET,
+    move,
+  })),
+  ...EMOTIONS_RECORDED_MOVES.map((move) => ({
+    dataset: EMOTIONS_RECORDED_DATASET,
+    move,
+  })),
+];
 
 // ============================================================================
 // Extension Class
@@ -285,6 +432,19 @@ export class ReachyMiniExtension {
    * Returns extension metadata and block definitions
    */
   getInfo(): ExtensionInfo {
+    const recordedMoveMenuItems = buildRecordedMoveMenuItems().map(({ dataset, move }) => {
+      const labelId = RECORDED_DATASET_LABELS[dataset];
+      const datasetLabel = labelId ? formatMessage(labelId) : dataset;
+      return {
+        text: `${datasetLabel}: ${move}`,
+        value: encodeRecordedMoveSelection(dataset, move),
+      };
+    });
+    const defaultRecordedMoveValue = encodeRecordedMoveSelection(
+      DEFAULT_RECORDED_DATASET,
+      DANCE_RECORDED_MOVES[0]
+    );
+
     return {
       id: 'reachymini',
       name: formatMessage('reachymini.extension.name'),
@@ -308,14 +468,10 @@ export class ReachyMiniExtension {
           blockType: 'command',
           text: formatMessage('reachymini.blocks.playRecordedMove'),
           arguments: {
-            DATASET: {
-              type: 'string',
-              menu: 'recordedDataset',
-              defaultValue: DEFAULT_RECORDED_DATASET,
-            },
             MOVE: {
               type: 'string',
-              defaultValue: DEFAULT_RECORDED_MOVE,
+              menu: 'recordedMove',
+              defaultValue: defaultRecordedMoveValue,
             },
           },
         },
@@ -514,18 +670,20 @@ export class ReachyMiniExtension {
             },
           ],
         },
-        recordedDataset: {
+        recordedMove: {
           acceptReporters: true,
-          items: [
-            {
-              text: formatMessage('reachymini.menus.recordedDataset.dances'),
-              value: DEFAULT_RECORDED_DATASET,
-            },
-            {
-              text: formatMessage('reachymini.menus.recordedDataset.emotions'),
-              value: EMOTIONS_RECORDED_DATASET,
-            },
-          ],
+          items:
+            recordedMoveMenuItems.length > 0
+              ? recordedMoveMenuItems
+              : [
+                  {
+                    text: formatMessage('reachymini.menus.recordedMove.empty'),
+                    value: encodeRecordedMoveSelection(
+                      DEFAULT_RECORDED_DATASET,
+                      DANCE_RECORDED_MOVES[0]
+                    ),
+                  },
+                ],
         },
         motionPreset: {
           acceptReporters: true,
@@ -631,12 +789,7 @@ export class ReachyMiniExtension {
    */
   async playRecordedMoveDataset(args: PlayRecordedMoveArgs): Promise<void> {
     try {
-      const dataset = `${args.DATASET ?? ''}`.trim();
-      const move = `${args.MOVE ?? ''}`.trim();
-
-      if (!dataset || !move) {
-        throw new Error('Dataset and move name are required');
-      }
+      const { dataset, move } = decodeRecordedMoveSelection(args.MOVE);
 
       const result = await apiClient.playRecordedMove(dataset, move);
       this.state.currentMoveUuid = result.uuid;
@@ -1113,7 +1266,7 @@ interface ArgumentDefinition {
  */
 interface MenuDefinition {
   acceptReporters?: boolean;
-  items: MenuItem[];
+  items: MenuItem[] | string;
 }
 
 /**

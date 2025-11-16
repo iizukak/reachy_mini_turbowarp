@@ -35,6 +35,18 @@ const sanitizeBaseUrl = (rawUrl: string): string => {
   }
 };
 
+const encodeDatasetPath = (rawDatasetName: string): string => {
+  const trimmed = rawDatasetName.trim().replace(/^\/+|\/+$/g, '');
+  if (trimmed.length === 0) {
+    throw new Error('[ReachyMiniApiClient] Dataset name is required');
+  }
+
+  return trimmed
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+};
+
 // ============================================================================
 // Configuration
 // ============================================================================
@@ -239,7 +251,7 @@ export class ReachyMiniApiClient {
    * Lists recorded moves available in a dataset
    */
   async listRecordedMoves(datasetName: string): Promise<string[]> {
-    const datasetSegment = encodeURIComponent(datasetName);
+    const datasetSegment = encodeDatasetPath(datasetName);
     const url = `${this.config.baseUrl}/move/recorded-move-datasets/list/${datasetSegment}`;
     return makeRequest<string[]>(
       url,
@@ -255,7 +267,7 @@ export class ReachyMiniApiClient {
    * Plays a recorded move from a dataset
    */
   async playRecordedMove(datasetName: string, moveName: string): Promise<MoveUUID> {
-    const datasetSegment = encodeURIComponent(datasetName);
+    const datasetSegment = encodeDatasetPath(datasetName);
     const moveSegment = encodeURIComponent(moveName);
     const url = `${this.config.baseUrl}/move/play/recorded-move-dataset/${datasetSegment}/${moveSegment}`;
     return makeRequest<MoveUUID>(

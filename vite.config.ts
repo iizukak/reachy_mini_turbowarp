@@ -1,7 +1,24 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { resolve } from 'path';
 
+const previewExtensionLinkPlugin = (): Plugin => ({
+  name: 'reachy-preview-extension-link',
+  configurePreviewServer(server) {
+    server.httpServer?.once('listening', () => {
+      const addressInfo = server.httpServer?.address();
+      if (!addressInfo || typeof addressInfo === 'string') {
+        return;
+      }
+
+      const host = addressInfo.address === '::' ? 'localhost' : addressInfo.address;
+      const url = `http://${host}:${addressInfo.port}/extension.js`;
+      server.config.logger.info(`\n  Extension ready at: ${url}\n`);
+    });
+  },
+});
+
 export default defineConfig({
+  plugins: [previewExtensionLinkPlugin()],
   // Build configuration for TurboWarp extension
   build: {
     // Library mode - generates a single JS file

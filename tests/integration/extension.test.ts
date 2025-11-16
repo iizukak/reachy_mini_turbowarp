@@ -366,9 +366,9 @@ describe('Extension Integration Tests', () => {
         return;
       }
 
+      const moveValue = `${dataset}||${moves[0] ?? ''}`;
       await extension.playRecordedMoveDataset({
-        DATASET: dataset,
-        MOVE: moves[0] ?? '',
+        MOVE: moveValue,
       });
 
       await waitForAnimation();
