@@ -1,6 +1,6 @@
 # Reachy Mini TurboWarp Extension
 
-![Reachy Mini TurboWarp Extension](img/screenshot.png)
+![Reachy Mini TurboWarp Extension](img/demo.gif)
 
 Custom TurboWarp/Scratch 3.0 extension for controlling the Reachy Mini robot.
 
