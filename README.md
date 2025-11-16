@@ -32,6 +32,29 @@ Custom TurboWarp/Scratch 3.0 extension for controlling the Reachy Mini robot.
    - Paste one of the jsDelivr URLs above.
    - The **Reachy Mini** blocks will appear; confirm the daemon is running to execute the blocks.
 
+## Supported Blocks
+
+| Block (EN) | Type | Description |
+| --- | --- | --- |
+| `wake up robot` | Command | Plays the built-in wake animation and waits for it to finish. |
+| `put robot to sleep` | Command | Runs the shutdown animation to park the robot safely. |
+| `play recorded move [MOVE]` | Command | Requests a recorded move from the selected dataset via the daemon. |
+| `move head [DIRECTION] for [DURATION] seconds` | Command | Moves the head to one of the eight presets (center/up/down/left/right + diagonals). |
+| `move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s` | Command | Sends custom angles (degrees input → radians) directly to `/move/goto`. |
+| `run preset motion [MOTION] [CYCLES] times` | Command | Plays predefined motion scripts (nod, shake, antenna wave, body sway). |
+| `move antennas left [LEFT]° right [RIGHT]° for [DURATION]s` | Command | Independently positions each antenna joint. |
+| `move both antennas [ANGLE]° for [DURATION]s` | Command | Moves both antennas symmetrically. |
+| `move body yaw [ANGLE]° for [DURATION]s` | Command | Rotates the torso around the yaw axis. |
+| `set motor mode [MODE]` | Command | Switches motor control to enabled / disabled / gravity compensation. |
+| `head pitch (degrees)` | Reporter | Returns the latest cached pitch value converted to degrees. |
+| `head yaw (degrees)` | Reporter | Returns the yaw angle in degrees. |
+| `head roll (degrees)` | Reporter | Returns the roll angle in degrees. |
+| `left antenna angle (degrees)` | Reporter | Reads the left antenna joint position. |
+| `right antenna angle (degrees)` | Reporter | Reads the right antenna joint position. |
+| `body yaw (degrees)` | Reporter | Reports the torso yaw angle. |
+| `motor mode` | Reporter | Indicates the daemon-reported motor mode. |
+| `daemon connected?` | Boolean | Pings `/daemon/status` to confirm connectivity. |
+
 ## Developer Guide
 
 Install dependencies once:
