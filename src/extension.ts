@@ -370,6 +370,106 @@ const RECORDED_DATASET_LABELS: Record<string, MessageId> = {
 };
 const RECORDED_MOVE_VALUE_SEPARATOR = '||';
 
+const RECORDED_MOVE_WORD_LABELS: Record<string, { en: string; ja: string }> = {
+  '1': { en: '1', ja: '1' },
+  '2': { en: '2', ja: '2' },
+  '3': { en: '3', ja: '3' },
+  amazed: { en: 'Amazed', ja: '驚き' },
+  and: { en: 'and', ja: '＆' },
+  anxiety: { en: 'Anxiety', ja: '不安' },
+  attentive: { en: 'Attentive', ja: '注目' },
+  away: { en: 'Away', ja: '離れて' },
+  boredom: { en: 'Boredom', ja: '退屈' },
+  calming: { en: 'Calming', ja: '落ち着き' },
+  cheerful: { en: 'Cheerful', ja: '陽気' },
+  chicken: { en: 'Chicken', ja: 'チキン' },
+  chin: { en: 'Chin', ja: 'あご' },
+  combo: { en: 'Combo', ja: 'コンボ' },
+  come: { en: 'Come', ja: 'おいで' },
+  confused: { en: 'Confused', ja: '混乱' },
+  contempt: { en: 'Contempt', ja: '軽蔑' },
+  curious: { en: 'Curious', ja: '好奇心' },
+  dance: { en: 'Dance', ja: 'ダンス' },
+  disgusted: { en: 'Disgusted', ja: '嫌悪' },
+  displeased: { en: 'Displeased', ja: '不満' },
+  dizzy: { en: 'Dizzy', ja: 'めまい' },
+  downcast: { en: 'Downcast', ja: 'うつむき' },
+  dying: { en: 'Dying', ja: '弱り' },
+  electric: { en: 'Electric', ja: 'エレクトリック' },
+  enthusiastic: { en: 'Enthusiastic', ja: '熱意' },
+  excited: { en: 'Excited', ja: '興奮' },
+  exhausted: { en: 'Exhausted', ja: '疲労' },
+  fear: { en: 'Fear', ja: '恐れ' },
+  flick: { en: 'Flick', ja: 'フリック' },
+  frustrated: { en: 'Frustrated', ja: 'いら立ち' },
+  furious: { en: 'Furious', ja: '激怒' },
+  glance: { en: 'Glance', ja: 'ちらり' },
+  go: { en: 'Go', ja: '行って' },
+  grateful: { en: 'Grateful', ja: '感謝' },
+  grid: { en: 'Grid', ja: 'グリッド' },
+  groovy: { en: 'Groovy', ja: 'グルーヴィー' },
+  head: { en: 'Head', ja: 'ヘッド' },
+  headbanger: { en: 'Headbanger', ja: 'ヘッドバンガー' },
+  helpful: { en: 'Helpful', ja: '助けたい' },
+  huh: { en: 'Huh', ja: 'ハッ' },
+  impatient: { en: 'Impatient', ja: 'いらだち' },
+  incomprehensible: { en: 'Incomprehensible', ja: '理解不能' },
+  indifferent: { en: 'Indifferent', ja: '無関心' },
+  inquiring: { en: 'Inquiring', ja: '問いかけ' },
+  interwoven: { en: 'Interwoven', ja: '絡み合う' },
+  irritated: { en: 'Irritated', ja: 'イライラ' },
+  jackson: { en: 'Jackson', ja: 'ジャクソン' },
+  laughing: { en: 'Laughing', ja: '笑い' },
+  lead: { en: 'Lead', ja: 'リード' },
+  lonely: { en: 'Lonely', ja: '孤独' },
+  lost: { en: 'Lost', ja: '迷い' },
+  loving: { en: 'Loving', ja: '愛情' },
+  neck: { en: 'Neck', ja: 'ネック' },
+  no: { en: 'No', ja: 'いいえ' },
+  nod: { en: 'Nod', ja: 'うなずき' },
+  oops: { en: 'Oops', ja: 'おっと' },
+  peck: { en: 'Peck', ja: 'つつき' },
+  peekaboo: { en: 'Peekaboo', ja: 'いないいないばあ' },
+  pendulum: { en: 'Pendulum', ja: '振り子' },
+  polyrhythm: { en: 'Polyrhythm', ja: 'ポリリズム' },
+  proud: { en: 'Proud', ja: '誇り' },
+  rage: { en: 'Rage', ja: '激昂' },
+  recoil: { en: 'Recoil', ja: 'のけぞり' },
+  recover: { en: 'Recover', ja: '立て直し' },
+  relief: { en: 'Relief', ja: '安心' },
+  reprimand: { en: 'Reprimand', ja: '叱責' },
+  resigned: { en: 'Resigned', ja: '諦め' },
+  roll: { en: 'Roll', ja: 'ロール' },
+  sad: { en: 'Sad', ja: '悲しみ' },
+  scared: { en: 'Scared', ja: '怖い' },
+  serenity: { en: 'Serenity', ja: '穏やか' },
+  sharp: { en: 'Sharp', ja: '鋭い' },
+  shy: { en: 'Shy', ja: '恥ずかし' },
+  side: { en: 'Side', ja: 'サイド' },
+  simple: { en: 'Simple', ja: 'シンプル' },
+  sleep: { en: 'Sleep', ja: '眠り' },
+  snap: { en: 'Snap', ja: 'スナップ' },
+  spin: { en: 'Spin', ja: 'スピン' },
+  spirals: { en: 'Spirals', ja: 'スパイラル' },
+  square: { en: 'Square', ja: 'スクエア' },
+  stumble: { en: 'Stumble', ja: 'つまずき' },
+  success: { en: 'Success', ja: '成功' },
+  surprised: { en: 'Surprised', ja: '驚き' },
+  sway: { en: 'Sway', ja: 'スウェイ' },
+  swing: { en: 'Swing', ja: 'スイング' },
+  thoughtful: { en: 'Thoughtful', ja: '思案' },
+  tilt: { en: 'Tilt', ja: 'チルト' },
+  tired: { en: 'Tired', ja: '疲れ' },
+  to: { en: 'to', ja: 'へ' },
+  uh: { en: 'Uh', ja: 'アッ' },
+  uncertain: { en: 'Uncertain', ja: '不確か' },
+  uncomfortable: { en: 'Uncomfortable', ja: '居心地悪い' },
+  understanding: { en: 'Understanding', ja: '理解' },
+  welcoming: { en: 'Welcoming', ja: '歓迎' },
+  yeah: { en: 'Yeah', ja: 'イエー' },
+  yes: { en: 'Yes', ja: 'はい' },
+};
+
 const encodeRecordedMoveSelection = (dataset: string, move: string): string =>
   `${dataset}${RECORDED_MOVE_VALUE_SEPARATOR}${move}`;
 
@@ -406,6 +506,38 @@ const buildRecordedMoveMenuItems = (): { dataset: string; move: string }[] => [
   })),
 ];
 
+const splitRecordedMoveWords = (move: string): string[] =>
+  move.split('_').flatMap((segment) => {
+    const lower = segment.toLowerCase();
+    const match = lower.match(/^([a-z]+)(\d+)?$/);
+    if (!match) {
+      return [lower];
+    }
+
+    const [, rawWord, number] = match;
+    const baseWord = rawWord ?? '';
+    const entries: string[] = [];
+    if (baseWord) {
+      entries.push(baseWord);
+    }
+    if (number) {
+      entries.push(number);
+    }
+    return entries.length > 0 ? entries : [lower];
+  });
+
+const capitalizeWord = (word: string): string =>
+  word.length === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1);
+
+const formatRecordedMoveLabel = (move: string, locale: keyof typeof TRANSLATIONS): string => {
+  const words = splitRecordedMoveWords(move);
+  if (locale === 'ja') {
+    return words.map((word) => RECORDED_MOVE_WORD_LABELS[word]?.ja ?? word).join(' ');
+  }
+
+  return words.map((word) => RECORDED_MOVE_WORD_LABELS[word]?.en ?? capitalizeWord(word)).join(' ');
+};
+
 // ============================================================================
 // Extension Class
 // ============================================================================
@@ -432,11 +564,13 @@ export class ReachyMiniExtension {
    * Returns extension metadata and block definitions
    */
   getInfo(): ExtensionInfo {
+    const locale = resolveLocale();
     const recordedMoveMenuItems = buildRecordedMoveMenuItems().map(({ dataset, move }) => {
       const labelId = RECORDED_DATASET_LABELS[dataset];
       const datasetLabel = labelId ? formatMessage(labelId) : dataset;
+      const moveLabel = formatRecordedMoveLabel(move, locale);
       return {
-        text: `${datasetLabel}: ${move}`,
+        text: `${datasetLabel}: ${moveLabel}`,
         value: encodeRecordedMoveSelection(dataset, move),
       };
     });
