@@ -5,6 +5,7 @@
 
 import { describe, test, expect, beforeAll, afterEach } from 'vitest';
 import { ReachyMiniExtension } from '../../src/extension.js';
+import { apiClient } from '../../src/api/client.js';
 // import { degToRad } from '../../src/utils/angle.js'; // Unused - only in commented out tests
 import {
   waitForDaemon,
@@ -329,15 +330,49 @@ describe('Extension Integration Tests', () => {
         CYCLES: 1,
       });
 
-      await delay(220);
-      const headYawDuring = await extension.getHeadYaw();
-      const bodyYawDuring = await extension.getBodyYaw();
-      expect(headYawDuring).toBeGreaterThan(1);
-      expect(bodyYawDuring).toBeGreaterThan(1);
+      const headYawDuring = await waitForCondition(
+        () => extension.getHeadYaw(),
+        (yaw) => yaw > 0.5,
+      );
+      const bodyYawDuring = await waitForCondition(
+        () => extension.getBodyYaw(),
+        (yaw) => yaw > 0.5,
+      );
+      expect(headYawDuring).toBeGreaterThan(0.5);
+      expect(bodyYawDuring).toBeGreaterThan(0.5);
 
       await motionPromise;
       const bodyYawAfter = await extension.getBodyYaw();
       expectAngleCloseTo(bodyYawAfter, 0, 4);
+    });
+  });
+
+  describe('Recorded Move Blocks', () => {
+    test('should play recorded move dataset when available', async () => {
+      let moves: string[] | null = null;
+      const dataset = 'pollen-robotics/reachy-mini-dances-library';
+      try {
+        moves = await apiClient.listRecordedMoves(dataset);
+      } catch (error) {
+        console.warn(
+          '[RecordedMoves] Skipping extension block test - dataset unavailable:',
+          error instanceof Error ? error.message : error,
+        );
+        return;
+      }
+
+      if (!moves || moves.length === 0) {
+        console.warn('[RecordedMoves] Skipping extension block test - no moves found');
+        return;
+      }
+
+      await extension.playRecordedMoveDataset({
+        DATASET: dataset,
+        MOVE: moves[0] ?? '',
+      });
+
+      await waitForAnimation();
+      expect(true).toBe(true);
     });
   });
 

@@ -14,6 +14,8 @@ import {
   expectAngleCloseTo,
 } from './test-utils.js';
 
+const DEFAULT_RECORDED_DATASET = 'pollen-robotics/reachy-mini-dances-library';
+
 describe('API Client Integration Tests', () => {
   beforeAll(async () => {
     // Wait for daemon to be ready (up to 10 seconds)
@@ -178,6 +180,46 @@ describe('API Client Integration Tests', () => {
     // Note: Motor mode changes are not supported in simulator
     // test('should set motor mode to disabled', async () => { ... });
     // test('should set motor mode to enabled', async () => { ... });
+  });
+
+  describe('Recorded Moves', () => {
+    test('should list recorded moves for default dataset', async () => {
+      let moves: string[] | null = null;
+      try {
+        moves = await apiClient.listRecordedMoves(DEFAULT_RECORDED_DATASET);
+      } catch (error) {
+        console.warn(
+          '[RecordedMoves] Skipping list test - dataset unavailable:',
+          error instanceof Error ? error.message : error,
+        );
+        return;
+      }
+
+      expect(Array.isArray(moves)).toBe(true);
+    });
+
+    test('should play first recorded move when dataset available', async () => {
+      let moves: string[] | null = null;
+      try {
+        moves = await apiClient.listRecordedMoves(DEFAULT_RECORDED_DATASET);
+      } catch (error) {
+        console.warn(
+          '[RecordedMoves] Skipping play test - dataset unavailable:',
+          error instanceof Error ? error.message : error,
+        );
+        return;
+      }
+
+      if (!moves || moves.length === 0) {
+        console.warn('[RecordedMoves] Skipping play test - no moves found in dataset');
+        return;
+      }
+
+      const result = await apiClient.playRecordedMove(DEFAULT_RECORDED_DATASET, moves[0] ?? '');
+      expect(result.uuid).toBeDefined();
+
+      await waitForAnimation();
+    });
   });
 
   describe('State Queries', () => {

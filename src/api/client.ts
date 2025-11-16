@@ -13,6 +13,28 @@ import type {
   StatusResponse,
 } from '../types/api.js';
 
+const LOCALHOST_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
+
+const sanitizeBaseUrl = (rawUrl: string): string => {
+  try {
+    const parsed = new URL(rawUrl);
+    if (!LOCALHOST_HOSTNAMES.has(parsed.hostname)) {
+      throw new Error(
+        `[ReachyMiniApiClient] Base URL must point to localhost (received ${parsed.hostname})`,
+      );
+    }
+    // Remove trailing slashes for consistency
+    const normalizedPath = parsed.pathname.replace(/\/+$/, '');
+    parsed.pathname = normalizedPath.length > 0 ? normalizedPath : '';
+    return parsed.toString().replace(/\/+$/, '');
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`[ReachyMiniApiClient] Invalid base URL: ${error.message}`);
+    }
+    throw new Error('[ReachyMiniApiClient] Invalid base URL');
+  }
+};
+
 // ============================================================================
 // Configuration
 // ============================================================================
@@ -105,9 +127,10 @@ export class ReachyMiniApiClient {
   private config: ApiConfig;
 
   constructor(config: Partial<ApiConfig> = {}) {
+    const baseUrl = sanitizeBaseUrl(config.baseUrl ?? DEFAULT_API_CONFIG.baseUrl);
     this.config = {
-      ...DEFAULT_API_CONFIG,
-      ...config,
+      baseUrl,
+      timeout: config.timeout ?? DEFAULT_API_CONFIG.timeout,
     };
   }
 
@@ -115,9 +138,11 @@ export class ReachyMiniApiClient {
    * Updates the API configuration
    */
   updateConfig(config: Partial<ApiConfig>): void {
+    const nextBaseUrl = config.baseUrl ? sanitizeBaseUrl(config.baseUrl) : this.config.baseUrl;
     this.config = {
       ...this.config,
       ...config,
+      baseUrl: nextBaseUrl,
     };
   }
 
@@ -201,6 +226,39 @@ export class ReachyMiniApiClient {
   async stopMovement(): Promise<StatusResponse> {
     const url = `${this.config.baseUrl}/move/stop`;
     return makeRequest<StatusResponse>(
+      url,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      this.config.timeout
+    );
+  }
+
+  /**
+   * Lists recorded moves available in a dataset
+   */
+  async listRecordedMoves(datasetName: string): Promise<string[]> {
+    const datasetSegment = encodeURIComponent(datasetName);
+    const url = `${this.config.baseUrl}/move/recorded-move-datasets/list/${datasetSegment}`;
+    return makeRequest<string[]>(
+      url,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      this.config.timeout
+    );
+  }
+
+  /**
+   * Plays a recorded move from a dataset
+   */
+  async playRecordedMove(datasetName: string, moveName: string): Promise<MoveUUID> {
+    const datasetSegment = encodeURIComponent(datasetName);
+    const moveSegment = encodeURIComponent(moveName);
+    const url = `${this.config.baseUrl}/move/play/recorded-move-dataset/${datasetSegment}/${moveSegment}`;
+    return makeRequest<MoveUUID>(
       url,
       {
         method: 'POST',

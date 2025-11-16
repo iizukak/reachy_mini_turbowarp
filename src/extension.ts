@@ -11,6 +11,7 @@ import type {
   HeadDirection,
   HeadDirectionPresets,
   PerformPresetMotionArgs,
+  PlayRecordedMoveArgs,
   PresetMotionDefinition,
   PresetMotionId,
 } from './types/extension.js';
@@ -27,6 +28,7 @@ const EN_MESSAGES = {
   'reachymini.blocks.moveHeadDirection': 'move head [DIRECTION] for [DURATION] seconds',
   'reachymini.blocks.moveHeadCustom':
     'move head pitch [PITCH]° yaw [YAW]° roll [ROLL]° for [DURATION]s',
+  'reachymini.blocks.playRecordedMove': 'play recorded move dataset [DATASET] move [MOVE]',
   'reachymini.blocks.performPresetMotion': 'run preset motion [MOTION] [CYCLES] times',
   'reachymini.blocks.moveAntennas': 'move antennas left [LEFT]° right [RIGHT]° for [DURATION]s',
   'reachymini.blocks.moveAntennasBoth': 'move both antennas [ANGLE]° for [DURATION]s',
@@ -53,6 +55,8 @@ const EN_MESSAGES = {
   'reachymini.menus.motionPreset.headShake': 'head shake',
   'reachymini.menus.motionPreset.antennaWave': 'antenna wave',
   'reachymini.menus.motionPreset.bodySway': 'body sway',
+  'reachymini.menus.recordedDataset.dances': 'dances library',
+  'reachymini.menus.recordedDataset.emotions': 'emotions library',
   'reachymini.menus.motorMode.enabled': 'enabled',
   'reachymini.menus.motorMode.disabled': 'disabled',
   'reachymini.menus.motorMode.gravityComp': 'gravity compensation',
@@ -67,6 +71,7 @@ const JA_MESSAGES: Record<MessageId, string> = {
   'reachymini.blocks.moveHeadDirection': '頭を [DIRECTION] に [DURATION] 秒動かす',
   'reachymini.blocks.moveHeadCustom':
     '頭を pitch [PITCH]° yaw [YAW]° roll [ROLL]° で [DURATION] 秒動かす',
+  'reachymini.blocks.playRecordedMove': '録画モーション [DATASET] の [MOVE] を再生する',
   'reachymini.blocks.performPresetMotion': 'プリセット動作 [MOTION] を [CYCLES] 回再生する',
   'reachymini.blocks.moveAntennas': 'アンテナを 左 [LEFT]° 右 [RIGHT]° で [DURATION] 秒動かす',
   'reachymini.blocks.moveAntennasBoth': '両方のアンテナを [ANGLE]° で [DURATION] 秒動かす',
@@ -93,6 +98,8 @@ const JA_MESSAGES: Record<MessageId, string> = {
   'reachymini.menus.motionPreset.headShake': '首をふる',
   'reachymini.menus.motionPreset.antennaWave': 'アンテナをふる',
   'reachymini.menus.motionPreset.bodySway': 'からだをゆらす',
+  'reachymini.menus.recordedDataset.dances': 'ダンスライブラリ',
+  'reachymini.menus.recordedDataset.emotions': '感情ライブラリ',
   'reachymini.menus.motorMode.enabled': 'オン',
   'reachymini.menus.motorMode.disabled': 'オフ',
   'reachymini.menus.motorMode.gravityComp': '重力補償',
@@ -245,6 +252,13 @@ const buildHeadPose = (overrides?: Partial<XYZRPYPose>): XYZRPYPose => ({
   yaw: overrides?.yaw ?? BASE_HEAD_POSE.yaw,
 });
 
+/**
+ * Default recorded dataset references used in menus
+ */
+const DEFAULT_RECORDED_DATASET = 'pollen-robotics/reachy-mini-dances-library';
+const EMOTIONS_RECORDED_DATASET = 'pollen-robotics/reachy-mini-emotions-library';
+const DEFAULT_RECORDED_MOVE = 'wave';
+
 // ============================================================================
 // Extension Class
 // ============================================================================
@@ -288,6 +302,22 @@ export class ReachyMiniExtension {
           opcode: 'gotoSleep',
           blockType: 'command',
           text: formatMessage('reachymini.blocks.gotoSleep'),
+        },
+        {
+          opcode: 'playRecordedMoveDataset',
+          blockType: 'command',
+          text: formatMessage('reachymini.blocks.playRecordedMove'),
+          arguments: {
+            DATASET: {
+              type: 'string',
+              menu: 'recordedDataset',
+              defaultValue: DEFAULT_RECORDED_DATASET,
+            },
+            MOVE: {
+              type: 'string',
+              defaultValue: DEFAULT_RECORDED_MOVE,
+            },
+          },
         },
         '---',
 
@@ -484,6 +514,19 @@ export class ReachyMiniExtension {
             },
           ],
         },
+        recordedDataset: {
+          acceptReporters: true,
+          items: [
+            {
+              text: formatMessage('reachymini.menus.recordedDataset.dances'),
+              value: DEFAULT_RECORDED_DATASET,
+            },
+            {
+              text: formatMessage('reachymini.menus.recordedDataset.emotions'),
+              value: EMOTIONS_RECORDED_DATASET,
+            },
+          ],
+        },
         motionPreset: {
           acceptReporters: true,
           items: [
@@ -579,6 +622,42 @@ export class ReachyMiniExtension {
       console.warn('Go to sleep animation did not complete within timeout');
     } catch (error) {
       console.error('Failed to put robot to sleep:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Play a recorded move dataset entry
+   */
+  async playRecordedMoveDataset(args: PlayRecordedMoveArgs): Promise<void> {
+    try {
+      const dataset = `${args.DATASET ?? ''}`.trim();
+      const move = `${args.MOVE ?? ''}`.trim();
+
+      if (!dataset || !move) {
+        throw new Error('Dataset and move name are required');
+      }
+
+      const result = await apiClient.playRecordedMove(dataset, move);
+      this.state.currentMoveUuid = result.uuid;
+
+      await sleep(300);
+      const maxWaitTime = 60000;
+      const pollInterval = 300;
+      const startTime = Date.now();
+
+      while (Date.now() - startTime < maxWaitTime) {
+        const isRunning = await apiClient.isMovementRunning();
+        if (!isRunning) {
+          await sleep(200);
+          return;
+        }
+        await sleep(pollInterval);
+      }
+
+      console.warn('Recorded move did not complete within timeout');
+    } catch (error) {
+      console.error('Failed to play recorded move dataset:', error);
       throw error;
     }
   }
