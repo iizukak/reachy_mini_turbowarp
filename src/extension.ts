@@ -107,9 +107,52 @@ const JA_MESSAGES: Record<MessageId, string> = {
   'reachymini.menus.motorMode.gravityComp': '重力補償',
 };
 
-const TRANSLATIONS: Record<'en' | 'ja', Record<MessageId, string>> = {
+const FR_MESSAGES = {
+  'reachymini.extension.name': 'Reachy Mini',
+  'reachymini.blocks.wakeUp': 'réveiller le robot',
+  'reachymini.blocks.gotoSleep': 'mettre le robot en veille',
+  'reachymini.blocks.moveHeadDirection': 'bouger la tête vers [DIRECTION] en [DURATION]s',
+  'reachymini.blocks.moveHeadCustom':
+    'bouger la tête en tangage [PITCH]° lacet [YAW]° roulis [ROLL]° en [DURATION]s',
+  'reachymini.blocks.playRecordedMove': 'jouer le mouvement enregistré [MOVE]',
+  'reachymini.menus.recordedMove.empty': 'aucun mouvement disponible',
+  'reachymini.blocks.performPresetMotion': 'exécuter le mouvement prédéfini [MOTION] [CYCLES] fois',
+  'reachymini.blocks.moveAntennas': 'bouger les antennes gauche [LEFT]° droite [RIGHT]° en [DURATION]s',
+  'reachymini.blocks.moveAntennasBoth': 'bouger les deux antennes [ANGLE]° en [DURATION]s',
+  'reachymini.blocks.moveBodyYaw': 'tourner le corps [ANGLE]° en [DURATION]s',
+  'reachymini.blocks.setMotorMode': 'mettre les moteurs en mode [MODE]',
+  'reachymini.blocks.getHeadPitch': 'angle de tangage de la tête (degrés)',
+  'reachymini.blocks.getHeadYaw': 'angle de lacet de la tête (degrés)',
+  'reachymini.blocks.getHeadRoll': 'angle de roulis de la tête (degrés)',
+  'reachymini.blocks.getLeftAntenna': 'angle de l\'antenne gauche (degrés)',
+  'reachymini.blocks.getRightAntenna': 'angle de l\'antenne droite (degrés)',
+  'reachymini.blocks.getBodyYaw': 'angle de rotation du corps (degrés)',
+  'reachymini.blocks.getMotorMode': 'mode moteur',
+  'reachymini.blocks.isDaemonConnected': 'démon connecté ?',
+  'reachymini.menus.headDirection.center': 'centre',
+  'reachymini.menus.headDirection.up': 'haut',
+  'reachymini.menus.headDirection.down': 'bas',
+  'reachymini.menus.headDirection.left': 'gauche',
+  'reachymini.menus.headDirection.right': 'droite',
+  'reachymini.menus.headDirection.upLeft': 'haut gauche',
+  'reachymini.menus.headDirection.upRight': 'haut droite',
+  'reachymini.menus.headDirection.downLeft': 'bas gauche',
+  'reachymini.menus.headDirection.downRight': 'bas droite',
+  'reachymini.menus.motionPreset.headNod': 'hochement de tête',
+  'reachymini.menus.motionPreset.headShake': 'secouer la tête',
+  'reachymini.menus.motionPreset.antennaWave': 'ondulation des antennes',
+  'reachymini.menus.motionPreset.bodySway': 'balancement du corps',
+  'reachymini.menus.recordedDataset.dances': 'bibliothèque de danses',
+  'reachymini.menus.recordedDataset.emotions': 'bibliothèque d\'émotions',
+  'reachymini.menus.motorMode.enabled': 'activé',
+  'reachymini.menus.motorMode.disabled': 'désactivé',
+  'reachymini.menus.motorMode.gravityComp': 'compensation de gravité',
+} as const;
+
+const TRANSLATIONS: Record<'en' | 'ja' | 'fr', Record<MessageId, string>> = {
   en: EN_MESSAGES,
   ja: JA_MESSAGES,
+  fr: FR_MESSAGES,
 };
 
 type ScratchTranslate = {
@@ -810,14 +853,14 @@ export class ReachyMiniExtension {
             recordedMoveMenuItems.length > 0
               ? recordedMoveMenuItems
               : [
-                  {
-                    text: formatMessage('reachymini.menus.recordedMove.empty'),
-                    value: encodeRecordedMoveSelection(
-                      DEFAULT_RECORDED_DATASET,
-                      DANCE_RECORDED_MOVES[0]
-                    ),
-                  },
-                ],
+                {
+                  text: formatMessage('reachymini.menus.recordedMove.empty'),
+                  value: encodeRecordedMoveSelection(
+                    DEFAULT_RECORDED_DATASET,
+                    DANCE_RECORDED_MOVES[0]
+                  ),
+                },
+              ],
         },
         motionPreset: {
           acceptReporters: true,
