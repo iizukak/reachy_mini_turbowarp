@@ -7,7 +7,7 @@ Custom TurboWarp/Scratch 3.0 extension for controlling the Reachy Mini robot.
 ## Prerequisites
 
 - **[TurboWarp Desktop](https://desktop.turbowarp.org/)** (or the web editor) installed.
-- **[Reachy Mini SDK](https://github.com/pollen-robotics/reachy_mini)** checked out on your machine.
+- **reachy-mini** Python package installed from PyPI (e.g. `pip install "reachy-mini[mujoco]"` for the simulator backend).
 - The `reachy-mini-daemon` process running (real robot, wireless version, or simulator mode).  
   The extension communicates with the daemon at `http://localhost:8000/api/`, so ensure the daemon is reachable before loading the extension.
 

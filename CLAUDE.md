@@ -35,7 +35,6 @@ reachy_mini_turbowarp/
 │   ├── deploy-extension.yml      # main push で gh-pages へ出力
 │   └── release.yml               # vX.Y.Z タグを GitHub Release 化
 ├── dist/                         # `npm run build` で生成（IIFE）
-├── reachy_mini/                  # Python SDK submodule
 ├── deprecated/                   # JS 試作コード（参照のみ）
 ├── public/, img/, node_modules/, package*.json, tsconfig.json など
 └── vite.config.ts                # IIFE ビルド + CORS enable
@@ -47,6 +46,7 @@ reachy_mini_turbowarp/
 - **Lint / Format**: ESLint 9 + `@typescript-eslint` + Prettier 3（`npm run lint`, `npm run format:check`）
 - **テスト**: Vitest 4（`tests/unit`, `tests/integration`）
 - **型定義**: `@turbowarp/types`（Git submodule 由来の TW 型）
+- **Python daemon**: PyPI `reachy-mini` をインストールして `reachy-mini-daemon` を実行（サブモジュール不要、用途に応じて `mujoco` などの extras を付与）
 - **Node 要件**: Node 18 以上 / npm 9 以上
 
 ## Extension 実装ハイライト（`src/extension.ts`）
@@ -119,7 +119,7 @@ npm run build && npm run preview  # dist/extension.js を確認
 ## CI/CD ワークフロー
 1. **`test.yml`**
    - `unit-tests`: Node 20 で `npm ci` → `npm run test:unit`
-   - `integration-tests`: Reachy Mini submodule + LFS をチェックアウトし、Python 3.11 + MuJoCo 依存を apt でインストール → daemon を headless 起動 → build → `npm run test:integration`。失敗時は `daemon.log` を artifact 化。
+   - `integration-tests`: Python 3.11 + MuJoCo 依存を apt でインストールし、PyPI から `pip install "reachy-mini[mujoco]"` → daemon を headless 起動 → build → `npm run test:integration`。失敗時は `daemon.log` を artifact 化。
    - `lint`: ESLint & Prettier check。
 2. **`deploy-extension.yml`**
    - main への push（および手動トリガー）で `npm run build` → `dist/` を `gh-pages` ブランチへ force deploy（`peaceiris/actions-gh-pages`）。
@@ -133,7 +133,7 @@ npm run build && npm run preview  # dist/extension.js を確認
 
 ## Daemon 運用メモ
 ```bash
-cd reachy_mini
+pip install "reachy-mini[mujoco]"  # 初回のみ（シミュレータ用）。実機は extras なしでも可。
 reachy-mini-daemon --sim --headless --no-wake-up-on-start
 # 実機 (Lite): USB 接続後 `reachy-mini-daemon`
 # Wireless: Raspberry Pi 側で自動起動 or SSH で起動

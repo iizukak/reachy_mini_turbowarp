@@ -44,6 +44,6 @@ export default [
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'deprecated/', 'reachy_mini/'],
+    ignores: ['dist/', 'node_modules/', 'deprecated/'],
   },
 ];

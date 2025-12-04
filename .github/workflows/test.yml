@@ -34,9 +34,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,10 +45,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1 libosmesa6 libglew-dev libportaudio2
 
-      - name: Install Reachy Mini with MuJoCo
+      - name: Install reachy-mini from PyPI (with MuJoCo)
         run: |
-          cd reachy_mini
-          pip install -e .[mujoco]
+          pip install "reachy-mini[mujoco]"
 
       - name: Verify reachy-mini-daemon installation
         run: |

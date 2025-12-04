@@ -8,8 +8,5 @@ build/
 # Deprecated code
 deprecated/
 
-# Submodule
-reachy_mini/
-
 # Config files
 package-lock.json

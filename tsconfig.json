@@ -43,7 +43,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "deprecated",
-    "reachy_mini"
+    "deprecated"
   ]
 }
