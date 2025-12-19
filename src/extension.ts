@@ -117,15 +117,16 @@ const FR_MESSAGES = {
   'reachymini.blocks.playRecordedMove': 'jouer le mouvement enregistré [MOVE]',
   'reachymini.menus.recordedMove.empty': 'aucun mouvement disponible',
   'reachymini.blocks.performPresetMotion': 'exécuter le mouvement prédéfini [MOTION] [CYCLES] fois',
-  'reachymini.blocks.moveAntennas': 'bouger les antennes gauche [LEFT]° droite [RIGHT]° en [DURATION]s',
+  'reachymini.blocks.moveAntennas':
+    'bouger les antennes gauche [LEFT]° droite [RIGHT]° en [DURATION]s',
   'reachymini.blocks.moveAntennasBoth': 'bouger les deux antennes [ANGLE]° en [DURATION]s',
   'reachymini.blocks.moveBodyYaw': 'tourner le corps [ANGLE]° en [DURATION]s',
   'reachymini.blocks.setMotorMode': 'mettre les moteurs en mode [MODE]',
   'reachymini.blocks.getHeadPitch': 'angle de tangage de la tête (degrés)',
   'reachymini.blocks.getHeadYaw': 'angle de lacet de la tête (degrés)',
   'reachymini.blocks.getHeadRoll': 'angle de roulis de la tête (degrés)',
-  'reachymini.blocks.getLeftAntenna': 'angle de l\'antenne gauche (degrés)',
-  'reachymini.blocks.getRightAntenna': 'angle de l\'antenne droite (degrés)',
+  'reachymini.blocks.getLeftAntenna': "angle de l'antenne gauche (degrés)",
+  'reachymini.blocks.getRightAntenna': "angle de l'antenne droite (degrés)",
   'reachymini.blocks.getBodyYaw': 'angle de rotation du corps (degrés)',
   'reachymini.blocks.getMotorMode': 'mode moteur',
   'reachymini.blocks.isDaemonConnected': 'démon connecté ?',
@@ -143,7 +144,7 @@ const FR_MESSAGES = {
   'reachymini.menus.motionPreset.antennaWave': 'ondulation des antennes',
   'reachymini.menus.motionPreset.bodySway': 'balancement du corps',
   'reachymini.menus.recordedDataset.dances': 'bibliothèque de danses',
-  'reachymini.menus.recordedDataset.emotions': 'bibliothèque d\'émotions',
+  'reachymini.menus.recordedDataset.emotions': "bibliothèque d'émotions",
   'reachymini.menus.motorMode.enabled': 'activé',
   'reachymini.menus.motorMode.disabled': 'désactivé',
   'reachymini.menus.motorMode.gravityComp': 'compensation de gravité',
@@ -853,14 +854,14 @@ export class ReachyMiniExtension {
             recordedMoveMenuItems.length > 0
               ? recordedMoveMenuItems
               : [
-                {
-                  text: formatMessage('reachymini.menus.recordedMove.empty'),
-                  value: encodeRecordedMoveSelection(
-                    DEFAULT_RECORDED_DATASET,
-                    DANCE_RECORDED_MOVES[0]
-                  ),
-                },
-              ],
+                  {
+                    text: formatMessage('reachymini.menus.recordedMove.empty'),
+                    value: encodeRecordedMoveSelection(
+                      DEFAULT_RECORDED_DATASET,
+                      DANCE_RECORDED_MOVES[0]
+                    ),
+                  },
+                ],
         },
         motionPreset: {
           acceptReporters: true,
