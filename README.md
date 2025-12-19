@@ -77,7 +77,7 @@ CI (GitHub Actions) runs lint, unit tests, integration tests, and a deploy job t
 
 ## Known Limitations
 
-- **Languages**: Only English (`en`) and Japanese (`ja`) strings are currently provided.
-- **Locale detection**: The extension switches language based on the host OS locale, not TurboWarp’s UI language preference.
+- **Languages**: English (`en`), Japanese (`ja`), and French (`fr`) strings are provided.
+- **Locale detection**: The extension switches language based on the Scratch/TurboWarp runtime locale (or the translator language), not a user-selectable UI language preference.
 - **Hardware validation**: Real-hardware test coverage is limited; most scenarios have only been exercised in the simulator.
 - **Wireless edition**: The wireless Reachy Mini has not been tested; quick smoke tests were done solely on the Lite version.
